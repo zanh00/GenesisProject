@@ -10,8 +10,8 @@ uint32_t ClockHandling_GetTimerClkFreq(TIM_HandleTypeDef *htim)
     uint32_t apbPrescaler   = 0;
     uint32_t timpre         = 0;
 
-    if(htim->Instance == TIM17 || htim->Instance == TIM16 || htim->Instance == TIM15 
-        || htim->Instance == TIM8 || htim->Instance == TIM1)
+    if( htim->Instance == TIM17 || htim->Instance == TIM16 || htim->Instance == TIM15 
+        || htim->Instance == TIM8 || htim->Instance == TIM1 )
     {
         pclk = HAL_RCC_GetPCLK2Freq();
         apbPrescaler = (RCC->D2CFGR & RCC_D2CFGR_D2PPRE2) >> 8;

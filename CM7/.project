@@ -30,6 +30,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>ClockHandling</name>
+			<type>2</type>
+			<location>C:/Users/zan/Documents/STM32_programi/GenesisProject/UserCode/ClockHandling</location>
+		</link>
+		<link>
 			<name>Common</name>
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Common</locationURI>

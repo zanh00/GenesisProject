@@ -28,6 +28,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "AppMainCM7.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -128,6 +130,7 @@ __HAL_RCC_HSEM_CLK_ENABLE();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
+  AppCM7_Main();
   TIM2->CCR1 = 24000;
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   /* USER CODE END 2 */
