@@ -149,8 +149,6 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="ClockHandling|Common|Core|Drivers" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
-                        						
                         <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ClockHandling"/>
                         						
                         <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>

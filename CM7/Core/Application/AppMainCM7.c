@@ -2,21 +2,36 @@
 
 static void Steering_PWMInit(const uint32_t internalTimerClock, const uint32_t sysclk, uint32_t* const CCRmin, uint32_t* const CCRmax);
 
+uint8_t data[5];
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+
+	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
+
+    HAL_UART_Receive_IT(&huart2, data, 1);
+}
+
 void AppCM7_Main()
 {
     const uint32_t timerClk = ClockHandling_GetTimerClkFreq(&htim2);
     const uint32_t sysClk   = HAL_RCC_GetSysClockFreq();
     uint32_t CCRmin = 0; 
     uint32_t CCRmax = 0;
+    uint8_t send = '6';
+
 
     Steering_PWMInit(timerClk, sysClk, &CCRmin, &CCRmax);
 
     TIM2->CCR1 = CCRmax;
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 
+    HAL_UART_Receive_IT(&huart2, data, 1);
+
     while(1)
     {
-
+    	HAL_UART_Transmit(&huart2, &send, 1, 1000);
+    	HAL_Delay(2000);
     }
 }
 
