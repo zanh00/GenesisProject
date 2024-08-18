@@ -2,7 +2,7 @@
 
 static void Steering_PWMInit(const uint32_t internalTimerClock, const uint32_t sysclk, uint32_t* const CCRmin, uint32_t* const CCRmax);
 
-uint8_t data[5];
+uint8_t data[ESP_PACKET_SIZE] = {0};
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -19,6 +19,8 @@ void AppCM7_Main()
     uint32_t CCRmin = 0; 
     uint32_t CCRmax = 0;
     uint8_t send = '6';
+    uint32_t dataForEsp = 0x1234567F;
+    uint8_t id = 0x5;
 
 
     Steering_PWMInit(timerClk, sysClk, &CCRmin, &CCRmax);
@@ -28,9 +30,15 @@ void AppCM7_Main()
 
     HAL_UART_Receive_IT(&huart2, data, 1);
 
+    if( Serializer_DataForESP(id, dataForEsp, data) != true )
+    {
+        //error
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+    }
+
     while(1)
     {
-    	HAL_UART_Transmit(&huart2, &send, 1, 1000);
+    	HAL_UART_Transmit(&huart2, &data, sizeof(data), 1000);
     	HAL_Delay(2000);
     }
 }

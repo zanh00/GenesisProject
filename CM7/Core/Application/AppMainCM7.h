@@ -8,6 +8,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "ClockHandling.h"
+#include "Serializer.h"
 
 
 void AppCM7_Main();
