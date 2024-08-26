@@ -344,5 +344,7 @@
         </scannerConfigBuildInfo>
         	
     </storageModule>
+    	
+    <storageModule moduleId="refreshScope"/>
     
 </cproject>

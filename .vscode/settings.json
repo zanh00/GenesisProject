@@ -12,6 +12,7 @@
         "spi.h": "c",
         "main.h": "c",
         "stdint.h": "c",
-        "clockhandling.h": "c"
+        "clockhandling.h": "c",
+        "usart.h": "c"
     }
 }
