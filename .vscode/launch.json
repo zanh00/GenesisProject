@@ -1,0 +1,39 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Cortex Debug",
+            "cwd": "${workspaceFolder}/Genesis_stm",
+            "executable": "${workspaceFolder}/Genesis_stm/Makefile/CM7/build/Genesis_stm_CM7.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "stlink",
+            "device": "STM32H755ZI",
+            "armToolchainPath": "C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2021.10/bin",
+            "preLaunchTask": "Build",
+            "svdFile": "${workspaceFolder}/Genesis_stm/STM32H755_CM7.svd"
+            
+        },
+        {
+            "name": "Cortex Debug Flash Only",
+            "cwd": "${workspaceFolder}/Genesis_stm",
+            "executable": "${workspaceFolder}/Genesis_stm/Makefile/CM7/build/Genesis_stm_CM7.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "stlink",
+            "device": "STM32H755ZI",
+            "armToolchainPath": "C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2021.10/bin",
+            "preLaunchTask": "Build",
+            "runToEntryPoint": "",              // Don't run to main
+            "postLaunchCommands": [
+                "monitor reset",                  // Reset after flashing
+                "disconnect"                      // Disconnect from the target
+            ]
+        }
+    ]
+}

@@ -35,6 +35,7 @@ void AppCM7_Main()
 
     TIM2->CCR1 = CCRmax;
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
 
     // HAL_UART_Receive_IT(&huart2, data, 1);
 
