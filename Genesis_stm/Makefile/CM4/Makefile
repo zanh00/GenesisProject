@@ -197,7 +197,7 @@ $(BUILD_DIR):
 # clean up
 #######################################
 clean:
-	-rm -fR $(BUILD_DIR)
+	-rmdir /S /Q $(BUILD_DIR)
   
 #######################################
 # dependencies

@@ -68,7 +68,10 @@ C_SOURCES =  \
 ../../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c \
 ../../Common/Src/system_stm32h7xx_dualcore_boot_cm4_cm7.c \
 ../../CM7/Core/Src/sysmem.c \
-../../CM7/Core/Src/syscalls.c
+../../CM7/Core/Src/syscalls.c \
+../../CM7/Core/Application/AppMainCM7.c \
+../../Common/ClockHandling/ClockHandling.c \
+../../Common/Serializer/Serializer.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -130,10 +133,13 @@ AS_INCLUDES =
 # C includes
 C_INCLUDES =  \
 -I../../CM7/Core/Inc \
+-I../../CM7/Core/Application \
 -I../../Drivers/STM32H7xx_HAL_Driver/Inc \
 -I../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy \
 -I../../Drivers/CMSIS/Device/ST/STM32H7xx/Include \
--I../../Drivers/CMSIS/Include
+-I../../Drivers/CMSIS/Include \
+-I../../Common/ClockHandling \
+-I../../Common/Serializer 
 
 
 # compile gcc flags
@@ -202,7 +208,7 @@ $(BUILD_DIR):
 # clean up
 #######################################
 clean:
-	-rm -fR $(BUILD_DIR)
+	-rmdir /S /Q $(BUILD_DIR)
   
 #######################################
 # dependencies

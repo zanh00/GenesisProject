@@ -103,7 +103,7 @@ main=	cd	Secure && $(MAKE)
 # clean up
 #######################################
 clean:
-	-rm -fR $(EXEC)
+	-rmdir /S /Q $(EXEC)
   
 #######################################
 # dependencies
