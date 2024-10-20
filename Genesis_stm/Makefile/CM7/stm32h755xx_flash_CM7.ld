@@ -43,8 +43,9 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 MEMORY
 {
 FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 1024K
-RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 128K
-ITCMRAM (xrw)      : ORIGIN = 0x00000000, LENGTH = 64K
+RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 128K
+ITCMRAM (xrw)   : ORIGIN = 0x00000000, LENGTH = 64K
+SRAM1 (xrw)     : ORIGIN = 0x10000000, LENGTH = 128K
 }
 
 /* Define output sections */
@@ -127,7 +128,16 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
   } >RAM AT> FLASH
 
-  
+  .sram1 :
+  {
+      . = ALIGN(4);
+      _sram1_start = .;   /* Start address of SRAM1 section */
+      *(.sram1)           /* Place all variables labeled with ".sram1" here */
+      *(.sram1*)          /* Ensure all .sram1 prefixed variables are included */
+      . = ALIGN(4);
+      _sram1_end = .;     /* End address of SRAM1 section */
+  } >SRAM1  
+
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :

@@ -1,10 +1,12 @@
 #include "AppMainCM7.h"
 
 static void Steering_PWMInit(const uint32_t internalTimerClock, const uint32_t sysclk, uint32_t* const CCRmin, uint32_t* const CCRmax);
+static uint32_t SpeedMeasurement_TIM_Init(const uint32_t timerPeripherialClk);
 
 uint8_t data[ESP_PACKET_SIZE] = {0};
 uint8_t txData[4] = {0xAA, 0xBB, 0xCC, 0xDD};  // Data to send back
 uint8_t receivedData[4] = {0};
+__attribute__((section(".sram1"))) uint32_t speedMeasurement_timeCaptures[4];
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -20,22 +22,48 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
     HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14); // Red
 }
 
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+    if( htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)
+    {
+        uint32_t period[3];
+        volatile float avgPeriod;
+        volatile float freq;
+        for( uint8_t i = 0; i < 3; i++ )
+        {
+            period[i] = speedMeasurement_timeCaptures[i+1] - speedMeasurement_timeCaptures[i];
+        }
+        avgPeriod = (period[0] + period[1] + period[2]) / 3;
+        freq = 1 / avgPeriod;
+        freq++;
+    }
+}
+
 void AppCM7_Main()
 {
-    const uint32_t timerClk = ClockHandling_GetTimerClkFreq(&htim2);
+    const uint32_t timer2Clk = ClockHandling_GetTimerClkFreq(&htim2);
+    uint32_t timer5Clk = ClockHandling_GetTimerClkFreq(&htim5);
     const uint32_t sysClk   = HAL_RCC_GetSysClockFreq();
     uint32_t CCRmin = 0; 
     uint32_t CCRmax = 0;
     uint8_t send = '6';
     uint32_t dataForEsp = 0x1234567F;
     uint8_t id = 0x5;
+    HAL_StatusTypeDef status = HAL_OK;
 
 
-    Steering_PWMInit(timerClk, sysClk, &CCRmin, &CCRmax);
+
+    Steering_PWMInit(timer2Clk, sysClk, &CCRmin, &CCRmax);
+    timer5Clk = SpeedMeasurement_TIM_Init(timer5Clk);
 
     TIM2->CCR1 = CCRmax;
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+    status = HAL_TIM_IC_Start_DMA(&htim5, TIM_CHANNEL_4, speedMeasurement_timeCaptures, 4);
+    if( status != HAL_OK )
+    {
+        Error_Handler();
+    }
 
     // HAL_UART_Receive_IT(&huart2, data, 1);
 
@@ -81,8 +109,26 @@ static void Steering_PWMInit(const uint32_t internalTimerClock, const uint32_t s
 
     htim2.Init.Prescaler    = presc - 1;
     htim2.Init.Period       = ARR;
-    if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+    if( HAL_TIM_Base_Init(&htim2) != HAL_OK )
     {
       Error_Handler();
     }
+}
+
+static uint32_t SpeedMeasurement_TIM_Init(const uint32_t timerPeripherialClk)
+{
+    uint32_t usedTimerClk = timerPeripherialClk;
+
+    if( timerPeripherialClk > 200000000 ) // greater than 200 MHz
+    {
+        htim5.Init.Prescaler = 1;
+        if( HAL_TIM_Base_Init(&htim5) != HAL_OK)
+        {
+            Error_Handler();
+        }
+
+        usedTimerClk = timerPeripherialClk / 2;
+    }
+
+    return usedTimerClk;
 }

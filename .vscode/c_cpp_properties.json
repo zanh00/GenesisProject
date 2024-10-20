@@ -4,6 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/Genesis_stm/CM7/Core/Inc",
                 "${workspaceFolder}/Genesis_stm/Drivers/STM32H7xx_HAL_Driver/Inc",
                 "${workspaceFolder}/Genesis_stm/Drivers/CMSIS/Device/ST/STM32H7xx/Include",
                 "${workspaceFolder}/Genesis_stm/Drivers/CMSIS/Include",
