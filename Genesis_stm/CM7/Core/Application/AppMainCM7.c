@@ -52,7 +52,6 @@ void AppCM7_Main()
     HAL_StatusTypeDef status = HAL_OK;
 
 
-
     Steering_PWMInit(timer2Clk, sysClk, &CCRmin, &CCRmax);
     timer5Clk = SpeedMeasurement_TIM_Init(timer5Clk);
 

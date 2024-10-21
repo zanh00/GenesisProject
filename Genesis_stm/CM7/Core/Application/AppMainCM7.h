@@ -9,6 +9,9 @@
 #include "gpio.h"
 #include "ClockHandling.h"
 #include "Serializer.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
 
 
 void AppCM7_Main();

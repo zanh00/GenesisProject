@@ -72,7 +72,12 @@ C_SOURCES =  \
 ../../CM7/Core/Application/AppMainCM7.c \
 ../../Common/ClockHandling/ClockHandling.c \
 ../../Common/Serializer/Serializer.c \
-../../CM7/Core/Src/dma.c
+../../CM7/Core/Src/dma.c \
+../../Common/FreeRTOS/list.c \
+../../Common/FreeRTOS/queue.c \
+../../Common/FreeRTOS/stream_buffer.c \
+../../Common/FreeRTOS/tasks.c \
+../../Common/FreeRTOS/portable_CM7/MemMang/heap_4.c \
 
 # ASM sources
 ASM_SOURCES =  \
@@ -140,7 +145,9 @@ C_INCLUDES =  \
 -I../../Drivers/CMSIS/Device/ST/STM32H7xx/Include \
 -I../../Drivers/CMSIS/Include \
 -I../../Common/ClockHandling \
--I../../Common/Serializer 
+-I../../Common/Serializer \
+-I../../Common/FreeRTOS/include \
+-I../../Common/FreeRTOS/portable_CM7/GCC/ARM_CM7/r0p1 
 
 
 # compile gcc flags
