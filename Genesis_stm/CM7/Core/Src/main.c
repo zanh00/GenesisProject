@@ -139,6 +139,9 @@ HSEM notification */
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
+  // Set NVIC priority grouping for FreeRTOS compatibility
+  HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+
   AppCM7_Main();
   /* USER CODE END 2 */
 

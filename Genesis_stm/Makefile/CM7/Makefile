@@ -70,6 +70,7 @@ C_SOURCES =  \
 ../../CM7/Core/Src/sysmem.c \
 ../../CM7/Core/Src/syscalls.c \
 ../../CM7/Core/Application/AppMainCM7.c \
+../../CM7/Core/Application/SpeedEstimation/SpeedEstimation.c \
 ../../Common/ClockHandling/ClockHandling.c \
 ../../Common/Serializer/Serializer.c \
 ../../CM7/Core/Src/dma.c \
@@ -77,6 +78,7 @@ C_SOURCES =  \
 ../../Common/FreeRTOS/queue.c \
 ../../Common/FreeRTOS/stream_buffer.c \
 ../../Common/FreeRTOS/tasks.c \
+../../Common/FreeRTOS/portable_CM7/GCC/ARM_CM7/r0p1/port.c \
 ../../Common/FreeRTOS/portable_CM7/MemMang/heap_4.c \
 
 # ASM sources
@@ -140,6 +142,7 @@ AS_INCLUDES =
 C_INCLUDES =  \
 -I../../CM7/Core/Inc \
 -I../../CM7/Core/Application \
+-I../../CM7/Core/Application/SpeedEstimation \
 -I../../Drivers/STM32H7xx_HAL_Driver/Inc \
 -I../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy \
 -I../../Drivers/CMSIS/Device/ST/STM32H7xx/Include \
