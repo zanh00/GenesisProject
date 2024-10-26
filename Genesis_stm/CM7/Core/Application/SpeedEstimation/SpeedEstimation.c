@@ -19,6 +19,8 @@
 DMA_BUFFER  static uint32_t gSpeedEstimation_TimeCapturesBurfferd   [SPEEDESTIMATION_SAMPLE_COUNT];
             static uint32_t gSpeedEstimation_TimeCaptures           [SPEEDESTIMATION_SAMPLE_COUNT] = {0};
 
+            QueueHandle_t   q_speed = NULL;
+
 //////////////////////////////////////////////////////////////////////////////
 // Function prototypes 
 //////////////////////////////////////////////////////////////////////////////
@@ -35,7 +37,7 @@ static bool     SpeedEstimation_NewValuesCaptured           (void* prevCaptures)
 void SpeedEstimation_Task(void* pvParameters)
 {
     uint32_t            timerClk    = ClockHandling_GetTimerClkFreq(&htim5);
-    volatile float               speed       = 0;
+    float               speed       = 0;
     TickType_t          lastWakeTime;
     const TickType_t    taskPeriod  = pdMS_TO_TICKS(SPEEDESTIMATION_PERIOD_MS);
     HAL_StatusTypeDef   status      = HAL_OK;
@@ -64,10 +66,9 @@ void SpeedEstimation_Task(void* pvParameters)
             speed = 0;
         }
 
-        //xQueueOverwrite(q_speed, &speed);
+        xQueueOverwrite(q_speed, &speed);
 
-        //vTaskDelayUntil(&lastWakeTime, taskPeriod);
-        vTaskDelay(50);
+        vTaskDelayUntil(&lastWakeTime, taskPeriod);
     }
 }
 
@@ -78,7 +79,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
     if( htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4 )
     {
-        //memcpy(gSpeedEstimation_TimeCaptures, gSpeedEstimation_TimeCapturesBurfferd, sizeof(gSpeedEstimation_TimeCaptures));
+        memcpy(gSpeedEstimation_TimeCaptures, gSpeedEstimation_TimeCapturesBurfferd, sizeof(gSpeedEstimation_TimeCaptures));
     }
 }
 
@@ -126,8 +127,8 @@ static uint32_t SpeedEstimation_TIM_Init(const uint32_t timerPeripherialClk)
 static bool SpeedEstimation_NewValuesCaptured(void* prevCaptures)
 {
     bool areNewValues = false;
-    //int32_t result = memcmp(gSpeedEstimation_TimeCaptures, prevCaptures, sizeof(gSpeedEstimation_TimeCaptures));
-    int32_t result = 0;
+    int32_t result = memcmp(gSpeedEstimation_TimeCaptures, prevCaptures, sizeof(gSpeedEstimation_TimeCaptures));
+
     if( result != 0 )
     {
         areNewValues = true;

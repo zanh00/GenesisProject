@@ -53,6 +53,7 @@ void AppCM7_Main()
     uint8_t id = 0x5;
     HAL_StatusTypeDef status = HAL_OK;
 
+
     Steering_PWMInit(timer2Clk, sysClk, &CCRmin, &CCRmax);
     //timer5Clk = SpeedMeasurement_TIM_Init(timer5Clk);
 
@@ -74,7 +75,9 @@ void AppCM7_Main()
     // }
     //HAL_SPI_TransmitReceive_IT(&hspi1, txData, receivedData, sizeof(txData));
 
-    xTaskCreate(SpeedEstimation_Task, "Speed measuremnet task", 256, NULL, 1, NULL);
+    xTaskCreate(SpeedEstimation_Task, "Speed task", 128, NULL, 2, NULL);
+
+    q_speed = xQueueCreate(1, sizeof(uint32_t));
 
     vTaskStartScheduler();
 
