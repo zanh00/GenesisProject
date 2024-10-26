@@ -44,7 +44,6 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 void AppCM7_Main()
 {
     const uint32_t timer2Clk = ClockHandling_GetTimerClkFreq(&htim2);
-    uint32_t timer5Clk = ClockHandling_GetTimerClkFreq(&htim5);
     const uint32_t sysClk   = HAL_RCC_GetSysClockFreq();
     uint32_t CCRmin = 0; 
     uint32_t CCRmax = 0;
@@ -60,11 +59,6 @@ void AppCM7_Main()
     TIM2->CCR1 = CCRmax;
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
-    // status = HAL_TIM_IC_Start_DMA(&htim5, TIM_CHANNEL_4, speedMeasurement_timeCaptures, 4);
-    // if( status != HAL_OK )
-    // {
-    //     Error_Handler();
-    // }
 
     // HAL_UART_Receive_IT(&huart2, data, 1);
 
@@ -123,23 +117,6 @@ static void Steering_PWMInit(const uint32_t internalTimerClock, const uint32_t s
     }
 }
 
-// static uint32_t SpeedMeasurement_TIM_Init(const uint32_t timerPeripherialClk)
-// {
-//     uint32_t usedTimerClk = timerPeripherialClk;
-
-//     if( timerPeripherialClk > 200000000 ) // greater than 200 MHz
-//     {
-//         htim5.Init.Prescaler = 1;
-//         if( HAL_TIM_Base_Init(&htim5) != HAL_OK)
-//         {
-//             Error_Handler();
-//         }
-
-//         usedTimerClk = timerPeripherialClk / 2;
-//     }
-
-//     return usedTimerClk;
-// }
 
 void vApplicationStackOverflowHook( TaskHandle_t xTask,
                                     char *pcTaskName )
