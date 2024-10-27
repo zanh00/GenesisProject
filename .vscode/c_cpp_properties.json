@@ -12,6 +12,7 @@
                 "${workspaceFolder}/Genesis_stm/Common/Serializer",
                 "${workspaceFolder}/Genesis_stm/CM7/Core/Application",
                 "${workspaceFolder}/Genesis_stm/CM7/Core/Application/SpeedEstimation",
+                "${workspaceFolder}/Genesis_stm/CM7/Core/Application/EspComms",
                 "${workspaceFolder}/Genesis_stm/Common/FreeRTOS/include",
                 "${workspaceFolder}/Genesis_stm/Common/FreeRTOS/portable_CM7/GCC/ARM_CM7/r0p1"
             ],
