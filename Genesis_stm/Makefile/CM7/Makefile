@@ -78,6 +78,8 @@ C_SOURCES =  \
 ../../Common/FreeRTOS/queue.c \
 ../../Common/FreeRTOS/stream_buffer.c \
 ../../Common/FreeRTOS/tasks.c \
+../../Common/FreeRTOS/event_groups.c \
+../../Common/FreeRTOS/timers.c \
 ../../Common/FreeRTOS/portable_CM7/GCC/ARM_CM7/r0p1/port.c \
 ../../Common/FreeRTOS/portable_CM7/MemMang/heap_4.c
 

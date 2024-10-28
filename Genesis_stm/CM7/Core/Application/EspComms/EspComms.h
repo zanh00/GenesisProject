@@ -23,6 +23,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "event_groups.h"
 
 #include <string.h>
 
@@ -32,12 +33,26 @@
 
 #define DMA_BUFFER __attribute__((section(".sram1")))
 
+#define EVENT_TX_REQUEST        (1 << 2)
+
+typedef union {
+    uint32_t    U32;
+    float       F;
+} DataUnion_t;
+
+typedef struct Message
+{
+    uint8_t     Id;
+    DataUnion_t Data;
+} Message_t;
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Global Variables 
 //////////////////////////////////////////////////////////////////////////////
 
-
+extern QueueHandle_t q_massageForEsp;
 
 //////////////////////////////////////////////////////////////////////////////
 // FreeRTOS Task
