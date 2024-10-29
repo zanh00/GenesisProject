@@ -43,7 +43,8 @@ EspComms_t gEspComms = {
 DMA_BUFFER uint8_t gDmaTxBuffer[ESP_PACKET_SIZE]        = {0};
 DMA_BUFFER uint8_t gDmaRxBuffer[ESP_PACKET_SIZE - 1]    = {0};
 
-EventGroupHandle_t e_uartFlags;
+EventGroupHandle_t e_uartFlags = NULL;
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Function prototypes 
@@ -86,6 +87,7 @@ void EspComms_Task(void* pvParameters)
             {
                 EspComms_OnTransferRequest();
                 eventBits = xEventGroupClearBits(e_uartFlags, EVENT_TX_REQUEST);
+                eventBits = xEventGroupClearBits(e_uartFlags, EVENT_TX_COMPLETE);
             }
         }
 
@@ -175,7 +177,7 @@ static void EspComms_OnTransferRequest(void)
     BaseType_t          result;
     HAL_StatusTypeDef   status = HAL_OK;
 
-    result = xQueueReceive(q_massageForEsp, &messageToSend, NULL);
+    result = xQueueReceive(q_messageForEsp, &messageToSend, NULL);
 
     if( result == pdPASS )
     {

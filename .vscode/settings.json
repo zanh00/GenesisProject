@@ -13,6 +13,7 @@
         "main.h": "c",
         "stdint.h": "c",
         "clockhandling.h": "c",
-        "usart.h": "c"
+        "usart.h": "c",
+        "speedestimation.h": "c"
     }
 }

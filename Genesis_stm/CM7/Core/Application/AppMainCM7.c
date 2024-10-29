@@ -1,45 +1,108 @@
+//////////////////////////////////////////////////////////////////////////////
+/*
+ *  AppMainCM7.c
+ *  
+ *  Main application body
+ * 
+ *  Created on: Jul 13, 2024
+ *      Author: Žan Hertiš
+ */
+ ////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+// Includes 
+//////////////////////////////////////////////////////////////////////////////
 #include "AppMainCM7.h"
+#include "ClockHandling.h"
+#include "Serializer.h"
+#include "SpeedEstimation.h"
+#include "EspComms.h"
+
+//////////////////////////////////////////////////////////////////////////////
+// Defines 
+//////////////////////////////////////////////////////////////////////////////
+
+#define NO_DELAY        0
+
+//////////////////////////////////////////////////////////////////////////////
+// Global Variables 
+//////////////////////////////////////////////////////////////////////////////
+
+EventGroupHandle_t e_commandFlags;
+EventGroupHandle_t e_statusFlags;
+
+//////////////////////////////////////////////////////////////////////////////
+// Function prototypes 
+//////////////////////////////////////////////////////////////////////////////
 
 static void Steering_PWMInit(const uint32_t internalTimerClock, const uint32_t sysclk, uint32_t* const CCRmin, uint32_t* const CCRmax);
-void vApplicationStackOverflowHook( TaskHandle_t xTask,
-                                    char *pcTaskName );
-//static uint32_t SpeedMeasurement_TIM_Init(const uint32_t timerPeripherialClk);
+void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName );
 
-uint8_t data[ESP_PACKET_SIZE] = {0};
-uint8_t txData[4] = {0xAA, 0xBB, 0xCC, 0xDD};  // Data to send back
-uint8_t receivedData[4] = {0};
-__attribute__((section(".sram1"))) uint32_t speedMeasurement_timeCaptures[4];
+/**
+ * We want main task to be executing at a fixed period of 50 ms. This simplyfies things since the 
+ * task will be working with multiple queues and sincronising the task on this multiple queues would
+ * be challenging. 
+ * At the same time we need to make sure not to overload the esp communication task. 
+ * The execution threads (steering and motor control) should report there status 
+ * via event flags. Since one event group can hold 24 flags in our example, this should be enough
+ * for all tasks to notify the main task about there status with the same event group.
+ * Main task will set the command flags (again, same for all tasks), execution tasks will poll the
+ * parts of the event group intended for that task and update their status flag. Main task will than
+ * be able to see if the staus flags match with the requested command and be able to determine any errors.
+ * The command flags will include if particular task will have to report any diagnostic data. If yes, than
+ * all the tasks will put the data in the same queue (Message structure with ID) and the main task will be
+ * sending those messages one by one to the esp comms task. The queu will be of a fixed size and if a task will
+ * not be able to write to the queue do to it being full, it will set the overload flag, that will notify
+ * the user that data is being lost. 
+ * 
+ */
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//////////////////////////////////////////////////////////////////////////////
+// FreeRTOS Task
+//////////////////////////////////////////////////////////////////////////////
+
+void Main_Task(void* pvParameters)
 {
+    EventBits_t commandFlags = 0;
+    BaseType_t  result;
+    Message_t   messageForEsp;
 
-	HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
+    q_UserCommand       = xQueueCreate(1, sizeof(uint32_t));
+    q_messageForEsp     = xQueueCreate(1, sizeof(Message_t));
+    q_DiagnosticData    = xQueueCreate(5, sizeof(Message_t));
 
-    HAL_UART_Receive_IT(&huart2, data, 1);
+    e_commandFlags  = xEventGroupCreate();
+
+    if( e_commandFlags == NULL )
+    {
+        Error_Handler();
+    }
+
+    while(1)
+    {
+        result = xQueueReceive(q_UserCommand, &commandFlags, NO_DELAY);
+
+        if( result == pdPASS )
+        {
+            commandFlags = xEventGroupSetBits(e_commandFlags, commandFlags);
+        }
+
+        result = xQueueReceive(q_DiagnosticData, &messageForEsp, NO_DELAY);
+
+        if( result == pdPASS )
+        {
+            result = xQueueSendToBack(q_messageForEsp, &messageForEsp, NO_DELAY);
+            if( result == pdPASS )
+            {
+                xEventGroupSetBits(e_uartFlags, EVENT_TX_REQUEST);
+            }
+        }
+    }
 }
 
-void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
-{
-    HAL_SPI_TransmitReceive_IT(&hspi1, txData, receivedData, sizeof(txData));
-    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14); // Red
-}
-
-// void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
-// {
-//     if( htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)
-//     {
-//         uint32_t period[3];
-//         volatile float avgPeriod;
-//         volatile float freq;
-//         for( uint8_t i = 0; i < 3; i++ )
-//         {
-//             period[i] = speedMeasurement_timeCaptures[i+1] - speedMeasurement_timeCaptures[i];
-//         }
-//         avgPeriod = (period[0] + period[1] + period[2]) / 3;
-//         freq = 1 / avgPeriod;
-//         freq++;
-//     }
-// }
+//////////////////////////////////////////////////////////////////////////////
+// Function Definitions 
+//////////////////////////////////////////////////////////////////////////////
 
 void AppCM7_Main()
 {
@@ -47,27 +110,12 @@ void AppCM7_Main()
     const uint32_t sysClk   = HAL_RCC_GetSysClockFreq();
     uint32_t CCRmin = 0; 
     uint32_t CCRmax = 0;
-    uint8_t send = '6';
-    uint32_t dataForEsp = 0x1234567F;
-    uint8_t id = 0x5;
-    HAL_StatusTypeDef status = HAL_OK;
 
+    //Steering_PWMInit(timer2Clk, sysClk, &CCRmin, &CCRmax);
+    // TIM2->CCR1 = CCRmax;
+    // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+    // HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
 
-    Steering_PWMInit(timer2Clk, sysClk, &CCRmin, &CCRmax);
-    //timer5Clk = SpeedMeasurement_TIM_Init(timer5Clk);
-
-    TIM2->CCR1 = CCRmax;
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
-
-    // HAL_UART_Receive_IT(&huart2, data, 1);
-
-    // if( Serializer_DataForESP(id, dataForEsp, data) != true )
-    // {
-    //     //error
-    //     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
-    // }
-    //HAL_SPI_TransmitReceive_IT(&hspi1, txData, receivedData, sizeof(txData));
 
     xTaskCreate(SpeedEstimation_Task, "Speed task", 128, NULL, 2, NULL);
 
@@ -77,11 +125,7 @@ void AppCM7_Main()
 
     while(1)
     {
-    	//HAL_UART_Transmit(&huart2, &data, sizeof(data), HAL_MAX_DELAY);
-    	// HAL_Delay(2000);
-    	//HAL_SPI_TransmitReceive(&hspi1, txData, receivedData, 4, HAL_MAX_DELAY);
-        //HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
-        // HAL_Delay(500);
+
     }
 }
 
@@ -118,8 +162,7 @@ static void Steering_PWMInit(const uint32_t internalTimerClock, const uint32_t s
 }
 
 
-void vApplicationStackOverflowHook( TaskHandle_t xTask,
-                                    char *pcTaskName )
+void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName )
 {
     while(1)
     {
