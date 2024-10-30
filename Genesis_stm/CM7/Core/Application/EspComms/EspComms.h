@@ -24,6 +24,8 @@
 #include "task.h"
 #include "queue.h"
 #include "event_groups.h"
+#include "AppMainCM7.h"
+#include "ProjectConfig.h"
 
 #include <string.h>
 
@@ -32,8 +34,6 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #define DMA_BUFFER __attribute__((section(".sram1")))
-
-#define EVENT_TX_REQUEST        (1 << 2)
 
 typedef union {
     uint32_t    U32;
@@ -52,13 +52,14 @@ typedef struct Message
 // Global Variables 
 //////////////////////////////////////////////////////////////////////////////
 
-extern QueueHandle_t        q_messageForEsp;
-
 extern EventGroupHandle_t   e_uartFlags;
 
 //////////////////////////////////////////////////////////////////////////////
 // FreeRTOS Task
 //////////////////////////////////////////////////////////////////////////////
+
+void EspComms_ReceiverTask      (void* pvParameters);
+void EspComms_TransmitterTask   (void* pveParameters);
 
 
 #endif /*  ESP_COMMS_H  */

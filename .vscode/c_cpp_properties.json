@@ -9,6 +9,7 @@
                 "${workspaceFolder}/Genesis_stm/Drivers/CMSIS/Device/ST/STM32H7xx/Include",
                 "${workspaceFolder}/Genesis_stm/Drivers/CMSIS/Include",
                 "${workspaceFolder}/Genesis_stm/Common/ClockHandling",
+                "${workspaceFolder}/Genesis_stm/Common/ProjectConfig",
                 "${workspaceFolder}/Genesis_stm/Common/Serializer",
                 "${workspaceFolder}/Genesis_stm/CM7/Core/Application",
                 "${workspaceFolder}/Genesis_stm/CM7/Core/Application/SpeedEstimation",

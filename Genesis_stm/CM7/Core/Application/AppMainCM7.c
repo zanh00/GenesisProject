@@ -17,26 +17,33 @@
 #include "Serializer.h"
 #include "SpeedEstimation.h"
 #include "EspComms.h"
+#include "ProjectConfig.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // Defines 
 //////////////////////////////////////////////////////////////////////////////
 
-#define NO_DELAY        0
+#define NO_DELAY                    0
+#define SEND_STATUS_FLAG_PERIOD     pdMS_TO_TICKS(500)
 
 //////////////////////////////////////////////////////////////////////////////
 // Global Variables 
 //////////////////////////////////////////////////////////////////////////////
 
-EventGroupHandle_t e_commandFlags;
-EventGroupHandle_t e_statusFlags;
+
+TimerHandle_t       t_statusTimer;
+QueueHandle_t       q_UserCommand       = NULL;
+QueueHandle_t       q_DiagnosticData    = NULL;
+EventGroupHandle_t  e_commandFlags      = NULL;
+EventGroupHandle_t  e_statusFlags       = NULL;
 
 //////////////////////////////////////////////////////////////////////////////
 // Function prototypes 
 //////////////////////////////////////////////////////////////////////////////
 
-static void Steering_PWMInit(const uint32_t internalTimerClock, const uint32_t sysclk, uint32_t* const CCRmin, uint32_t* const CCRmax);
-void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName );
+static  void Steering_PWMInit               (const uint32_t internalTimerClock, const uint32_t sysclk, uint32_t* const CCRmin, uint32_t* const CCRmax);
+        void vApplicationStackOverflowHook  (TaskHandle_t xTask, char *pcTaskName);
+static  void SendStatusUpdateCallback       (TimerHandle_t xTimer);
 
 /**
  * We want main task to be executing at a fixed period of 50 ms. This simplyfies things since the 
@@ -68,12 +75,19 @@ void Main_Task(void* pvParameters)
     Message_t   messageForEsp;
 
     q_UserCommand       = xQueueCreate(1, sizeof(uint32_t));
-    q_messageForEsp     = xQueueCreate(1, sizeof(Message_t));
     q_DiagnosticData    = xQueueCreate(5, sizeof(Message_t));
 
-    e_commandFlags  = xEventGroupCreate();
+    t_statusTimer = xTimerCreate("Status timer", SEND_STATUS_FLAG_PERIOD, pdTRUE, NULL, SendStatusUpdateCallback);
 
-    if( e_commandFlags == NULL )
+    if( t_statusTimer != NULL )
+    {
+        xTimerStart(t_statusTimer, portMAX_DELAY);
+    }
+
+    e_commandFlags  = xEventGroupCreate();
+    e_statusFlags   = xEventGroupCreate();
+
+    if( (e_commandFlags == NULL) || (e_statusFlags == NULL) )
     {
         Error_Handler();
     }
@@ -87,16 +101,6 @@ void Main_Task(void* pvParameters)
             commandFlags = xEventGroupSetBits(e_commandFlags, commandFlags);
         }
 
-        result = xQueueReceive(q_DiagnosticData, &messageForEsp, NO_DELAY);
-
-        if( result == pdPASS )
-        {
-            result = xQueueSendToBack(q_messageForEsp, &messageForEsp, NO_DELAY);
-            if( result == pdPASS )
-            {
-                xEventGroupSetBits(e_uartFlags, EVENT_TX_REQUEST);
-            }
-        }
     }
 }
 
@@ -126,6 +130,22 @@ void AppCM7_Main()
     while(1)
     {
 
+    }
+}
+
+static void SendStatusUpdateCallback(TimerHandle_t xTimer)
+{
+    Message_t   messageToSend;
+    BaseType_t  status;
+
+    messageToSend.Data.U32  = xEventGroupGetBits(e_statusFlags);
+    messageToSend.Id        = ID_STATUS_FLAG;
+
+    status = xQueueSendToBack(q_DiagnosticData, &messageToSend, NO_DELAY);
+
+    if( status == errQUEUE_FULL )
+    {
+        xEventGroupSetBits(e_statusFlags, SF_ESP_TRANSMISSION_OVERLOD);
     }
 }
 

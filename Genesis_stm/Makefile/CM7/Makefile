@@ -153,6 +153,7 @@ C_INCLUDES =  \
 -I../../Drivers/CMSIS/Include \
 -I../../Common/ClockHandling \
 -I../../Common/Serializer \
+-I../../Common/ProjectConfig \
 -I../../Common/FreeRTOS/include \
 -I../../Common/FreeRTOS/portable_CM7/GCC/ARM_CM7/r0p1 
 

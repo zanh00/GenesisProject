@@ -50,7 +50,7 @@ EventGroupHandle_t e_uartFlags = NULL;
 // Function prototypes 
 //////////////////////////////////////////////////////////////////////////////
 
-static void EspComms_OnTransferRequest  (void);
+static void EspComms_OnTransferRequest  (Message_t* messageToSendd);
 static void EspComms_OnMessageReceived  (TickType_t* const lastCommsCheck_ticks);
 static bool EspComms_ticksToTimeout     (const TickType_t lastCheck, TickType_t* const delayUnitlTimeout);
 
@@ -59,7 +59,7 @@ static bool EspComms_ticksToTimeout     (const TickType_t lastCheck, TickType_t*
 // FreeRTOS Task
 //////////////////////////////////////////////////////////////////////////////
 
-void EspComms_Task(void* pvParameters)
+void EspComms_ReceiverTask(void* pvParameters)
 {
     TickType_t      delayUntilTimeout_ticks = ESP_COMMS_CONNECTION_TIMEMOUT;
     TickType_t      lastCommsCheck_ticks    = xTaskGetTickCount();
@@ -79,42 +79,55 @@ void EspComms_Task(void* pvParameters)
 
     while(1)
     {
-        eventBits = xEventGroupWaitBits(e_uartFlags, EVENT_TX_REQUEST | EVENT_RX_COMPLETE, pdFALSE, pdFALSE, delayUntilTimeout_ticks);
+        eventBits = xEventGroupWaitBits(e_uartFlags, EVENT_RX_COMPLETE, pdFALSE, pdFALSE, delayUntilTimeout_ticks);
 
-        if( ( eventBits & EVENT_TX_REQUEST ) != 0 )    // only EVENT_TX_REQUEST is set
-        {
-            if(( eventBits & EVENT_TX_COMPLETE ) != 0 )     // transmision of previous data has been completed
-            {
-                EspComms_OnTransferRequest();
-                eventBits = xEventGroupClearBits(e_uartFlags, EVENT_TX_REQUEST);
-                eventBits = xEventGroupClearBits(e_uartFlags, EVENT_TX_COMPLETE);
-            }
-        }
-
-        if( ( eventBits & EVENT_RX_COMPLETE ) != 0 )   // only EVENT_RX_COMPLETE is set
+        if( ( eventBits & EVENT_RX_COMPLETE ) != 0 )   // EVENT_RX_COMPLETE is set
         {
             EspComms_OnMessageReceived(&lastCommsCheck_ticks);
             eventBits = xEventGroupClearBits(e_uartFlags, EVENT_RX_COMPLETE);
-
         }
 
         isTimedOut = EspComms_ticksToTimeout(lastCommsCheck_ticks, &delayUntilTimeout_ticks);
 
+        /*
+            In case of a timeout we set the timeout flag and we dely the task indefenetly,
+            or until some packet is received.
+            NOTE: Known limitation: if the application is left running in the timeout state, than
+            once the tick timer makes a full circle a false acquisition can be astablished for the 
+            duration of ESP_COMMS_CONNECTION_TIMEMOUT. This is due to the timer resolution and
+            the way the timout is being calculated.  
+        
+        */        
         if( isTimedOut )
         {
-            //TODO: Send some message to main task
+            xEventGroupSetBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMOUT);
+            delayUntilTimeout_ticks = portMAX_DELAY;
+        }
+        else
+        {
+            // clera the comms time out flag
+            xEventGroupClearBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMOUT);
         }
     }
 }
 
-/**
- * We would need event groups to be able to unblock a single esp task from either rx or tx callback function.
- * But with event groups there is a question of defering procesing to the deamon task
- * 
- * Also we need to make sure that periodic comms checks are being performed on a required interval and are successful.
- * Idealy we don't want a vTaskDelay function but rather to just block on waiting for event with a timeout 
- * that equals the remianing time for when comms check must arrive (with tolerance).
- */
+void EspComms_TransmitterTask(void* pveParameters)
+{
+    BaseType_t  result;
+    Message_t   message;
+    EventBits_t eventFlags;
+
+    while(1)
+    {
+        result = xQueueReceive(q_DiagnosticData, &message, portMAX_DELAY);
+
+        if( result == pdPASS )
+        {
+            eventFlags = xEventGroupWaitBits(e_uartFlags, EVENT_TX_COMPLETE, pdTRUE, pdFALSE, portMAX_DELAY);
+            EspComms_OnTransferRequest(&message);
+        }
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Function Definitions 
@@ -171,36 +184,24 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     }
 }
 
-static void EspComms_OnTransferRequest(void)
+static void EspComms_OnTransferRequest(Message_t* messageToSend)
 {
-    Message_t           messageToSend;
     BaseType_t          result;
     HAL_StatusTypeDef   status = HAL_OK;
 
-    result = xQueueReceive(q_messageForEsp, &messageToSend, NULL);
-
-    if( result == pdPASS )
+    if( Serializer_SerializeForESP(messageToSend->Id, messageToSend->Data.U32, gDmaTxBuffer) )
     {
-        if( Serializer_SerializeForESP(messageToSend.Id, messageToSend.Data.U32, gDmaTxBuffer) )
-        {
-            status = HAL_UART_Transmit_DMA(&huart2, gDmaTxBuffer, sizeof(gDmaTxBuffer));
+        status = HAL_UART_Transmit_DMA(&huart2, gDmaTxBuffer, sizeof(gDmaTxBuffer));
 
-            if( status != HAL_OK)
-            {
-                // Uart Error //TODO:
-            }
-        }
-        else
+        if( status != HAL_OK )
         {
-            // error, data can't be serialized //TODO:
+            // Uart Error //TODO:
         }
-
     }
     else
     {
-        // queue empty (shouldn't be) //TODO:
+        // error, data can't be serialized //TODO:
     }
-
 }
 
 static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
@@ -209,7 +210,7 @@ static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
 
     if( Seriazlizer_Deserialize(gEspComms.rxBuffer, &(receivedMessage.Id), &(receivedMessage.Data.U32)) )
     {
-        if( receivedMessage.Id == 4 )
+        if( receivedMessage.Id == ID_PERIODIC_COMMS_CHECHK )
         {
             *lastCommsCheck_ticks = xTaskGetTickCount();
         }
