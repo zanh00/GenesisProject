@@ -25,6 +25,7 @@
 
 #define NO_DELAY                    0
 #define SEND_STATUS_FLAG_PERIOD     pdMS_TO_TICKS(500)
+#define MAIN_TASK_PERIOD_MS         50
 
 //////////////////////////////////////////////////////////////////////////////
 // Global Variables 
@@ -32,10 +33,13 @@
 
 
 TimerHandle_t       t_statusTimer;
+
 QueueHandle_t       q_UserCommand       = NULL;
 QueueHandle_t       q_DiagnosticData    = NULL;
 EventGroupHandle_t  e_commandFlags      = NULL;
 EventGroupHandle_t  e_statusFlags       = NULL;
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Function prototypes 
@@ -73,9 +77,13 @@ void Main_Task(void* pvParameters)
     EventBits_t commandFlags = 0;
     BaseType_t  result;
     Message_t   messageForEsp;
+    TickType_t  lastWakeTime;
+
+    const TickType_t    taskPeriod  = pdMS_TO_TICKS(MAIN_TASK_PERIOD_MS);
 
     q_UserCommand       = xQueueCreate(1, sizeof(uint32_t));
     q_DiagnosticData    = xQueueCreate(5, sizeof(Message_t));
+    q_speed             = xQueueCreate(1, sizeof(uint32_t));
 
     t_statusTimer = xTimerCreate("Status timer", SEND_STATUS_FLAG_PERIOD, pdTRUE, NULL, SendStatusUpdateCallback);
 
@@ -92,6 +100,24 @@ void Main_Task(void* pvParameters)
         Error_Handler();
     }
 
+    // create other tasks
+    if( (xTaskCreate(SpeedEstimation_Task, "Speed task", 128, NULL, 2, NULL)) != pdPASS )
+    {
+        Error_Handler();
+    }
+
+    if( (xTaskCreate(EspComms_ReceiverTask, "Receiver task", 128, NULL, 4, NULL)) != pdPASS )
+    {
+        Error_Handler();
+    }
+
+    if( (xTaskCreate(EspComms_TransmitterTask, "Transmitter task", 128, NULL, 1, NULL)) != pdPASS )
+    {
+        Error_Handler();
+    }
+
+    lastWakeTime = xTaskGetTickCount();
+
     while(1)
     {
         result = xQueueReceive(q_UserCommand, &commandFlags, NO_DELAY);
@@ -101,6 +127,8 @@ void Main_Task(void* pvParameters)
             commandFlags = xEventGroupSetBits(e_commandFlags, commandFlags);
         }
 
+        // Sets the delay time which is equal to taskPeriod - task execution time
+        vTaskDelayUntil(&lastWakeTime, taskPeriod);
     }
 }
 
@@ -121,9 +149,10 @@ void AppCM7_Main()
     // HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
 
 
-    xTaskCreate(SpeedEstimation_Task, "Speed task", 128, NULL, 2, NULL);
-
-    q_speed = xQueueCreate(1, sizeof(uint32_t));
+    if( (xTaskCreate(Main_Task, "Main task", 512, NULL, 4, NULL)) != pdPASS )
+    {
+        Error_Handler();
+    }
 
     vTaskStartScheduler();
 

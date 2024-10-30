@@ -50,7 +50,7 @@ EventGroupHandle_t e_uartFlags = NULL;
 // Function prototypes 
 //////////////////////////////////////////////////////////////////////////////
 
-static void EspComms_OnTransferRequest  (Message_t* messageToSendd);
+static bool EspComms_OnTransferRequest  (Message_t* messageToSendd);
 static void EspComms_OnMessageReceived  (TickType_t* const lastCommsCheck_ticks);
 static bool EspComms_ticksToTimeout     (const TickType_t lastCheck, TickType_t* const delayUnitlTimeout);
 
@@ -90,7 +90,7 @@ void EspComms_ReceiverTask(void* pvParameters)
         isTimedOut = EspComms_ticksToTimeout(lastCommsCheck_ticks, &delayUntilTimeout_ticks);
 
         /*
-            In case of a timeout we set the timeout flag and we dely the task indefenetly,
+            In case of a timeout we set the timeout flag and we delay the task indefenetly,
             or until some packet is received.
             NOTE: Known limitation: if the application is left running in the timeout state, than
             once the tick timer makes a full circle a false acquisition can be astablished for the 
@@ -105,7 +105,7 @@ void EspComms_ReceiverTask(void* pvParameters)
         }
         else
         {
-            // clera the comms time out flag
+            // clear the comms timeout flag
             xEventGroupClearBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMOUT);
         }
     }
@@ -116,6 +116,7 @@ void EspComms_TransmitterTask(void* pveParameters)
     BaseType_t  result;
     Message_t   message;
     EventBits_t eventFlags;
+    bool        messageSent = false;
 
     while(1)
     {
@@ -123,8 +124,14 @@ void EspComms_TransmitterTask(void* pveParameters)
 
         if( result == pdPASS )
         {
-            eventFlags = xEventGroupWaitBits(e_uartFlags, EVENT_TX_COMPLETE, pdTRUE, pdFALSE, portMAX_DELAY);
-            EspComms_OnTransferRequest(&message);
+            eventFlags  = xEventGroupWaitBits(e_uartFlags, EVENT_TX_COMPLETE, pdTRUE, pdFALSE, portMAX_DELAY);
+            messageSent = EspComms_OnTransferRequest(&message);
+
+            // if message was sent of to uart we add some delay in order not to overload esp since it is generaly a much slower device
+            if( messageSent )
+            {
+                vTaskDelay(pdMS_TO_TICKS(5));
+            }
         }
     }
 }
@@ -184,10 +191,11 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     }
 }
 
-static void EspComms_OnTransferRequest(Message_t* messageToSend)
+static bool EspComms_OnTransferRequest(Message_t* messageToSend)
 {
     BaseType_t          result;
-    HAL_StatusTypeDef   status = HAL_OK;
+    HAL_StatusTypeDef   status      = HAL_OK;
+    bool                messagSent  = false;
 
     if( Serializer_SerializeForESP(messageToSend->Id, messageToSend->Data.U32, gDmaTxBuffer) )
     {
@@ -197,11 +205,17 @@ static void EspComms_OnTransferRequest(Message_t* messageToSend)
         {
             // Uart Error //TODO:
         }
+        else
+        {
+            messageSent = true;
+        }
     }
     else
     {
         // error, data can't be serialized //TODO:
     }
+
+    return messageSent;
 }
 
 static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
@@ -214,6 +228,21 @@ static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
         {
             *lastCommsCheck_ticks = xTaskGetTickCount();
         }
+        else
+        {
+            switch (receivedMessage.Id)
+            {
+            case ID_COMMAND_FLAG:
+                xQueueOverwrite(q_UserCommand, &(receivedMessage.Data.U32));
+                break;
+            
+            default:
+                //TODO: set unkonw ID Flag
+                break;
+            }
+        }
+
+        
 
         //TODO: switch all other possible IDs and send them to appropriate queues 
 
