@@ -72,6 +72,8 @@ C_SOURCES =  \
 ../../CM7/Core/Application/AppMainCM7.c \
 ../../CM7/Core/Application/SpeedEstimation/SpeedEstimation.c \
 ../../CM7/Core/Application/EspComms/EspComms.c \
+../../CM7/Core/Application/LongitudinalControl/LongitudinalControl.c \
+../../CM7/Core/Application/LongitudinalControl/PID_Controller/pid_controller.c \
 ../../Common/ClockHandling/ClockHandling.c \
 ../../Common/Serializer/Serializer.c \
 ../../CM7/Core/Src/dma.c \
@@ -147,6 +149,8 @@ C_INCLUDES =  \
 -I../../CM7/Core/Application \
 -I../../CM7/Core/Application/SpeedEstimation \
 -I../../CM7/Core/Application/EspComms \
+-I../../CM7/Core/Application/LongitudinalControl \
+-I../../CM7/Core/Application/LongitudinalControl/PID_Controller \
 -I../../Drivers/STM32H7xx_HAL_Driver/Inc \
 -I../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy \
 -I../../Drivers/CMSIS/Device/ST/STM32H7xx/Include \
