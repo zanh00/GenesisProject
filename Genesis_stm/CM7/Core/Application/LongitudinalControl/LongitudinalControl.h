@@ -38,5 +38,7 @@
 // FreeRTOS Task
 //////////////////////////////////////////////////////////////////////////////
 
+void LongitudinalControl_Task(void* pvParameters);
+
 
 #endif /* LONGITUDINAL_CONTROL */

@@ -15,6 +15,7 @@
         "clockhandling.h": "c",
         "usart.h": "c",
         "speedestimation.h": "c",
-        "semphr.h": "c"
+        "semphr.h": "c",
+        "longitudinalcontrol.h": "c"
     }
 }

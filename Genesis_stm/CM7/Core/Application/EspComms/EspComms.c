@@ -196,7 +196,7 @@ static bool EspComms_OnTransferRequest(Message_t* messageToSend)
 {
     BaseType_t          result;
     HAL_StatusTypeDef   status      = HAL_OK;
-    bool                messagSent  = false;
+    bool                messageSent  = false;
 
     if( Serializer_SerializeForESP(messageToSend->Id, messageToSend->Data.U32, gDmaTxBuffer) )
     {

@@ -17,6 +17,7 @@
 #include "Serializer.h"
 #include "SpeedEstimation.h"
 #include "EspComms.h"
+#include "LongitudinalControl.h"
 #include "ProjectConfig.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -116,6 +117,11 @@ void Main_Task(void* pvParameters)
     }
 
     if( (xTaskCreate(EspComms_TransmitterTask, "Transmitter task", 128, NULL, 1, NULL)) != pdPASS )
+    {
+        Error_Handler();
+    }
+
+    if( (xTaskCreate(LongitudinalControl_Task, "Speed control task", 128, NULL, 1, NULL)) != pdPASS )
     {
         Error_Handler();
     }
