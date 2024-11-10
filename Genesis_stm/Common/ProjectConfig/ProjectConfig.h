@@ -17,11 +17,14 @@
 // ESP <-> STM Message Library
 //////////////////////////////////////////////////////////////////////////////
 
-#define ID_COMMAND_FLAG                 1
-#define ID_REQUESTED_DIAGNOSTIC         2
-#define ID_REQUESTED_SPEED              3
-#define ID_PERIODIC_COMMS_CHECHK        4
-#define ID_STATUS_FLAG                  5
+#define ID_COMMAND_FLAG                                 1
+#define ID_REQUESTED_DIAGNOSTIC                         2
+#define ID_REQUESTED_SPEED                              3
+#define ID_PERIODIC_COMMS_CHECHK                        4
+#define ID_STATUS_FLAG                                  5
+#define ID_LONGITUDINAL_AUTOMODE_DIRECTION_SELECTION    6
+#define ID_LONGITUDINAL_SET_ACCELERATION                7
+#define ID_LONGITUDINAL_MANUAL_CONTROL                  8  
 
 //////////////////////////////////////////////////////////////////////////////
 // Status Flags

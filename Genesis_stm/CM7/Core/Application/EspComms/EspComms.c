@@ -24,6 +24,7 @@
 
 #define ESP_COMMS_CONNECTION_TIMEMOUT   pdMS_TO_TICKS(1000)
 #define U32_MAX_VALUE                   4294967295
+#define WAIT_FOR_QUEUE_MS               pdMS_TO_TICKS(10)
 
 typedef struct EspComms
 {
@@ -235,6 +236,13 @@ static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
             case ID_COMMAND_FLAG:
                 xQueueOverwrite(q_UserCommand, &(receivedMessage.Data.U32));
                 break;
+            case ID_LONGITUDINAL_AUTOMODE_DIRECTION_SELECTION:
+            case ID_LONGITUDINAL_SET_ACCELERATION:
+            case ID_LONGITUDINAL_MANUAL_CONTROL:
+                if( xQueueSendToBack(q_LongitudinalTaskData, &receivedMessage, WAIT_FOR_QUEUE_MS) != pdPASS )
+                {
+                    //TODO: Longitudinal task overload
+                }
             
             default:
                 //TODO: set unkonw ID Flag

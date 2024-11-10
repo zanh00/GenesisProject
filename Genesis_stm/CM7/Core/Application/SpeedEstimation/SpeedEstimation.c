@@ -23,9 +23,6 @@ DMA_BUFFER  static uint32_t gSpeedEstimation_TimeCapturesBurfferd   [SPEEDESTIMA
 // buffer where ISR copies data from dma buffer to be processed
             static uint32_t gSpeedEstimation_TimeCaptures           [SPEEDESTIMATION_SAMPLE_COUNT] = {0};
 
-// Queue handle for speed measurement
-            QueueHandle_t   q_speed = NULL;
-
 //////////////////////////////////////////////////////////////////////////////
 // Function prototypes 
 //////////////////////////////////////////////////////////////////////////////

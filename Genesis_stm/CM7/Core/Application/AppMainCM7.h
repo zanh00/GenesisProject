@@ -27,6 +27,7 @@
 #include "task.h"
 #include "queue.h"
 #include "event_groups.h"
+#include "semphr.h"
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -35,6 +36,8 @@
 
 extern QueueHandle_t q_UserCommand;
 extern QueueHandle_t q_DiagnosticData;
+extern QueueHandle_t q_LongitudinalTaskData;
+extern QueueHandle_t q_speed;
 
 extern EventGroupHandle_t  e_commandFlags;
 extern EventGroupHandle_t  e_statusFlags;

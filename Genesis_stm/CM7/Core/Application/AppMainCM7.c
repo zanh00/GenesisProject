@@ -34,10 +34,13 @@
 
 TimerHandle_t       t_statusTimer;
 
-QueueHandle_t       q_UserCommand       = NULL;
-QueueHandle_t       q_DiagnosticData    = NULL;
-EventGroupHandle_t  e_commandFlags      = NULL;
-EventGroupHandle_t  e_statusFlags       = NULL;
+QueueHandle_t       q_UserCommand           = NULL;
+QueueHandle_t       q_DiagnosticData        = NULL;
+QueueHandle_t       q_LongitudinalTaskData  = NULL;
+QueueHandle_t       q_speed                 = NULL;
+
+EventGroupHandle_t  e_commandFlags          = NULL;
+EventGroupHandle_t  e_statusFlags           = NULL;
 
 
 
@@ -81,9 +84,10 @@ void Main_Task(void* pvParameters)
 
     const TickType_t    taskPeriod  = pdMS_TO_TICKS(MAIN_TASK_PERIOD_MS);
 
-    q_UserCommand       = xQueueCreate(1, sizeof(uint32_t));
-    q_DiagnosticData    = xQueueCreate(5, sizeof(Message_t));
-    q_speed             = xQueueCreate(1, sizeof(uint32_t));
+    q_UserCommand           = xQueueCreate(1, sizeof(uint32_t));
+    q_DiagnosticData        = xQueueCreate(5, sizeof(Message_t));
+    q_LongitudinalTaskData  = xQueueCreate(5, sizeof(Message_t));
+    q_speed                 = xQueueCreate(1, sizeof(uint32_t));
 
     t_statusTimer = xTimerCreate("Status timer", SEND_STATUS_FLAG_PERIOD, pdTRUE, NULL, SendStatusUpdateCallback);
 
