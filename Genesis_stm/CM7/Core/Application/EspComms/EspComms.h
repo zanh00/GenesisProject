@@ -35,16 +35,6 @@
 
 #define DMA_BUFFER __attribute__((section(".sram1")))
 
-typedef union {
-    uint32_t    U32;
-    float       F;
-} DataUnion_t;
-
-typedef struct Message
-{
-    uint8_t     Id;
-    DataUnion_t Data;
-} Message_t;
 
 
 
