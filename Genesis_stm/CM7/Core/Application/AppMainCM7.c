@@ -83,12 +83,13 @@ void Main_Task(void* pvParameters)
     Message_t   messageForEsp;
     TickType_t  lastWakeTime;
 
-    const TickType_t    taskPeriod  = pdMS_TO_TICKS(MAIN_TASK_PERIOD_MS);
+    //const TickType_t    taskPeriod  = pdMS_TO_TICKS(MAIN_TASK_PERIOD_MS);
+    const TickType_t    taskPeriod  = pdMS_TO_TICKS(1000);
 
     q_UserCommand           = xQueueCreate(1, sizeof(uint32_t));
     q_DiagnosticData        = xQueueCreate(5, sizeof(Message_t));
     q_LongitudinalTaskData  = xQueueCreate(5, sizeof(Message_t));
-    q_speed                 = xQueueCreate(1, sizeof(uint32_t));
+    q_speed                 = xQueueCreate(1, sizeof(float));
 
     t_statusTimer = xTimerCreate("Status timer", SEND_STATUS_FLAG_PERIOD, pdTRUE, NULL, SendStatusUpdateCallback);
 
@@ -121,12 +122,14 @@ void Main_Task(void* pvParameters)
         Error_Handler();
     }
 
-    if( (xTaskCreate(LongitudinalControl_Task, "Speed control task", 128, NULL, 1, NULL)) != pdPASS )
-    {
-        Error_Handler();
-    }
+    // if( (xTaskCreate(LongitudinalControl_Task, "Speed control task", 128, NULL, 1, NULL)) != pdPASS )
+    // {
+    //     Error_Handler();
+    // }
 
     lastWakeTime = xTaskGetTickCount();
+
+    uint32_t speed;
 
     while(1)
     {
@@ -136,6 +139,9 @@ void Main_Task(void* pvParameters)
         {
             commandFlags = xEventGroupSetBits(e_commandFlags, commandFlags);
         }
+
+        xQueuePeek(q_speed, &speed, 0);
+        BaseType_t result = xQueueSendToBack(q_DiagnosticData, &speed, 0);
 
         // Sets the delay time which is equal to taskPeriod - task execution time
         vTaskDelayUntil(&lastWakeTime, taskPeriod);

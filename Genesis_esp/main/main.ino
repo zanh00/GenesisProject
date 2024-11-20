@@ -12,6 +12,7 @@ const char* mqtt_password = "Cokolada123";
 bool conctd = true;
 
 char stmMessage[10] = "Hi :)";
+bool stmRxComplete = false;
 bool rxComplete = false;
 char mqttMessage[50];
 
@@ -21,6 +22,15 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 HardwareSerial SerialUART(1);
+
+///////////////////////////////////////////////////////////////
+// Function prototipes
+///////////////////////////////////////////////////////////////
+void checkUart();
+
+///////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////
 
 void setup_wifi() {
   delay(10);
@@ -111,7 +121,8 @@ void setup() {
   //pinMode(16, OUTPUT);
 }
 
-void loop() {
+void loop() 
+{
   if (!client.connected()) {
     reconnect();
   }
@@ -123,13 +134,21 @@ void loop() {
     Serial.println();
     rxComplete = false;
   }
+
+  if( stmRxComplete )
+  {
+    //Serial.println();
+    Serial.print(stmMessage);
+    Serial.println();
+    stmRxComplete = false;
+  }
   
   //delay(5000);
 
   //SerialUART.write("4");
   //delay(2000);
 
-  if (millis() - lastSendTime > 1000) 
+  if (millis() - lastSendTime > 10000) 
   {
     lastSendTime = millis();
     publish_message(stmMessage);
@@ -137,26 +156,27 @@ void loop() {
     //Serial.println(WiFi.RSSI());
   }
 
-  
+  checkUart();
 }
 
-// void serialEvent()
-// {
-//   while( SerialUART.available() )
-//   {
-//     char chr = (char)SerialUART.read();
+void checkUart()
+{
+  while( SerialUART.available() )
+  {
+    char chr = (char)SerialUART.read();
+    //Serial.println(chr);
 
-//     if( chr == 'z' )
-//     {
-//       int result = SerialUART.readBytesUntil(chr, stmMessage, sizeof(stmMessage));
-//       if( result == 10 )
-//       {
-//         rxComplete = true;
-//       }
-//     }
+    if( chr == 'Z' )
+    {
+      int result = SerialUART.readBytesUntil(chr, stmMessage, sizeof(stmMessage));
+      if( result == 10 )
+      {
+        stmRxComplete = true;
+      }
+    }
 
-//   }
+  }
     
-// }
+}
 
 
