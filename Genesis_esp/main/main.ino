@@ -2,6 +2,16 @@
 #include <PubSubClient.h>
 #include <HardwareSerial.h>
 
+///////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////
+
+//#define     DEBUG_MODE
+
+///////////////////////////////////////////////////////////////
+// Variables
+///////////////////////////////////////////////////////////////
+
 const char* ssid = "WI-FIzgoraj_2G";
 const char* password = "lovrenchertis";
 const char* mqtt_server = "test.mosquitto.org";
@@ -11,7 +21,7 @@ const char* mqtt_user = "zanhertis@gmail.com";
 const char* mqtt_password = "Cokolada123";
 bool conctd = true;
 
-char stmMessage[10] = "Hi :)";
+char stmMessage[10] = "000000000";
 bool stmRxComplete = false;
 bool rxComplete = false;
 char mqttMessage[50];
@@ -27,6 +37,8 @@ HardwareSerial SerialUART(1);
 // Function prototipes
 ///////////////////////////////////////////////////////////////
 void checkUart();
+template <typename T>
+void debugPrint(T msg);
 
 ///////////////////////////////////////////////////////////////
 // Functions
@@ -34,36 +46,33 @@ void checkUart();
 
 void setup_wifi() {
   delay(10);
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+
+  debugPrint("Connecting to ");
+  debugPrint(ssid);
 
   WiFi.begin(ssid, password);
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
+  while (WiFi.status() != WL_CONNECTED) 
+  {
+    delay(200);
     Serial.print(".");
   }
   
   WiFi.setSleep(false);
 
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  debugPrint("");
+  debugPrint("WiFi connected");
+  debugPrint("IP address: ");
+  debugPrint(WiFi.localIP());
 }
 
 void setup_mqtt() {
   client.setServer(mqtt_server, mqtt_port);
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {
-  //Serial.print("Message arrived [");
-  //Serial.print(topic);
-  //Serial.print("] ");
-  
+void callback(char* topic, byte* payload, unsigned int length) 
+{
   for (int i = 0; i < length; i++) {
-    //Serial.print((char)payload[i]);
     mqttMessage[i] = (char)payload[i];
     if( i >= 49 )
     {
@@ -71,89 +80,88 @@ void callback(char* topic, byte* payload, unsigned int length) {
     }
   }
   rxComplete = true;
-  //Serial.println();
 }
 
-void reconnect() {
+void reconnect() 
+{
   while (!client.connected()) {
     if(conctd)
     {
-      Serial.print("Attempting MQTT connection...");
+      debugPrint("Attempting MQTT connection...");
     } 
-    if (client.connect("ESP32Client")) {
+    if (client.connect("ESP32Client")) 
+    {
       if(conctd)
       {
-        Serial.println("connected");
+        debugPrint("connected");
         conctd = false;
       }
       
-      client.subscribe("test150900", 0);
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
+      client.subscribe("zs", 0);
+    } else 
+    {
+      debugPrint("failed, rc=");
+      debugPrint(client.state());
+      debugPrint(" try again in 5 seconds");
       conctd = true;
-      delay(5000);
+      delay(1000);
     }
   }
 }
 
-void publish_message(const char* message) {
-  // Publish message to the "test150900" topic
-  if (client.publish("test150900", message))
+void publish_message(const char* message) 
+{  
+  if (client.publish("zr", message))
   {
-    Serial.println("Message sent successfully");
+    debugPrint("Msg sent");
   } else 
   {
-    Serial.println("Error sending message");
+    debugPrint("Error sending message");
   }
 }
 
-void setup() {
+void setup() 
+{
+#ifdef DEBUG_MODE
   Serial.begin(115200);
+#endif /* DEBUG_MODE */
   setup_wifi();
   setup_mqtt();
   client.setCallback(callback);
   client.setKeepAlive(60);
-  SerialUART.begin(115200, SERIAL_8N1, 23, 22); // 22 -> tx, 23 -> rx
-  SerialUART.setTimeout(50);
-  //Serial0.begin(115200, SERIAL_8N1, 23, 22);
+  //SerialUART.begin(115200, SERIAL_8N1, 23, 22); // 22 -> tx, 23 -> rx
+  //SerialUART.setTimeout(20);
   //pinMode(16, OUTPUT);
 }
 
 void loop() 
 {
-  if (!client.connected()) {
+  if ( !client.connected() ) 
+  {
     reconnect();
   }
   client.loop();
 
   if( rxComplete )
   {
-    Serial.print(mqttMessage);
-    Serial.println();
+    debugPrint(mqttMessage);
     rxComplete = false;
   }
 
   if( stmRxComplete )
   {
-    //Serial.println();
-    Serial.print(stmMessage);
-    Serial.println();
+    //debugPrint();
+    debugPrint(stmMessage);
     stmRxComplete = false;
   }
-  
-  //delay(5000);
 
-  //SerialUART.write("4");
-  //delay(2000);
-
-  if (millis() - lastSendTime > 10000) 
+  if (millis() - lastSendTime > 2000) 
   {
     lastSendTime = millis();
     publish_message(stmMessage);
-    //Serial.print("RSSI: ");
-    //Serial.println(WiFi.RSSI());
+    debugPrint("RSSI: ");
+    //debugPrint(WiFi.RSSI());  // doesn't work
+    //Serial.print(WiFi.RSSI())
   }
 
   checkUart();
@@ -164,7 +172,6 @@ void checkUart()
   while( SerialUART.available() )
   {
     char chr = (char)SerialUART.read();
-    //Serial.println(chr);
 
     if( chr == 'Z' )
     {
@@ -175,8 +182,13 @@ void checkUart()
       }
     }
 
-  }
-    
+  } 
 }
 
-
+template <typename T>
+void debugPrint(T msg)
+{
+#ifdef DEBUG_MODE
+  Serial.println(msg);
+#endif /* DEBUG_MODE */
+}
