@@ -119,6 +119,8 @@ void EspComms_TransmitterTask(void* pveParameters)
     EventBits_t eventFlags;
     bool        messageSent = false;
 
+    xEventGroupSetBits(e_uartFlags, EVENT_TX_COMPLETE);
+
     while(1)
     {
         result = xQueueReceive(q_DiagnosticData, &message, portMAX_DELAY);
