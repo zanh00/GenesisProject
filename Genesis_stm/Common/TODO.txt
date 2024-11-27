@@ -1,0 +1,2 @@
+- Set status flags for different events
+    - set a timer callback function (freeRTOS software timers) to disable certain status flags after some time elapses

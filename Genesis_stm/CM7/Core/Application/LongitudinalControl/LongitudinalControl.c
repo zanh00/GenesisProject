@@ -116,7 +116,7 @@ static void         LongitudinalControl_ManualControl           (void);
 static Direction_e  LongitudinalControl_StateStopped            (void);
 static Direction_e  LongitudinalControl_StateForward            (void);
 static Direction_e  LongitudinalControl_StateBackwards          (void);
-static void         LongitudinalControl_LaneKeepMode            (void);
+static void         LongitudinalControl_AutomaticMode           (void);
 
 //////////////////////////////////////////////////////////////////////////////
 // FreeRTOS Task
@@ -151,6 +151,9 @@ void LongitudinalControl_Task(void* pvParameters)
 
     lastWakeTime = xTaskGetTickCount();
 
+    // When all the tings are initialized and connection with the motor driver established we set a Lateral control task active flag
+    xEventGroupSetBits(e_statusFlags, SF_LONG_CONTROL_TASK_ACTIVE);
+
     while(1)
     {
         events = xEventGroupWaitBits(e_commandFlags, EVENT_MANUAL_DRIVE | EVENT_LANE_KEEP_MODE, pdFALSE, pdFALSE, WAIT_MODE_EVENT);
@@ -173,7 +176,7 @@ void LongitudinalControl_Task(void* pvParameters)
                 pidMode = AUTOMATIC;
                 PIDModeSet(&gPid, pidMode);
             }
-            LongitudinalControl_LaneKeepMode();
+            LongitudinalControl_AutomaticMode();
         }
         else if(gLongitudinalControl.speed != 0)
         { 
@@ -365,7 +368,7 @@ static Direction_e LongitudinalControl_StateBackwards(void)
     return retState;
 }
 
-static void LongitudinalControl_LaneKeepMode(void)
+static void LongitudinalControl_AutomaticMode(void)
 {
     uint8_t pidOutput;
 
