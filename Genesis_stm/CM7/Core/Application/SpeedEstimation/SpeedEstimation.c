@@ -12,6 +12,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "SpeedEstimation.h"
+#include "ProjectConfig.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // Global Variables 
@@ -65,6 +66,8 @@ void SpeedEstimation_Task(void* pvParameters)
         Error_Handler();
     }
 
+    xEventGroupSetBits(e_statusFlags, SF_SPEED_ESTIMATION_TASK_ACTIVE);
+    
     while(1)
     {
         /* 
