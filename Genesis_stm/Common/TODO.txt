@@ -1,2 +1,6 @@
 - Set status flags for different events
     - set a timer callback function (freeRTOS software timers) to disable certain status flags after some time elapses
+        - make use of timer ID -> one function for multiple events?
+        - one of the events to set a flag for lets say 5 seconds is the conformation when certain data that isn't commadn flag is received.
+          for example the set acceleration, requested speed...
+        

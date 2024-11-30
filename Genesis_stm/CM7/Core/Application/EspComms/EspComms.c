@@ -197,6 +197,7 @@ static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
 
         // any valid message received counts as a communications check
         *lastCommsCheck_ticks = xTaskGetTickCount();
+        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 
         //TODO: switch all other possible IDs and send them to appropriate queues 
 

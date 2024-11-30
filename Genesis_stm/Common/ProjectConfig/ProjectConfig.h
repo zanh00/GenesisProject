@@ -30,6 +30,7 @@
 // Status Flags
 //////////////////////////////////////////////////////////////////////////////
 
+#define SF_SPEED_ESTIMATION_TASK_ACTIVE (1 << 1)
 #define SF_LONG_CONTROL_TASK_ACTIVE     (1 << 3)
 #define SF_ESP_TRANSMISSION_OVERLOD     (1 << 5)
 #define SF_ESP_COMMUNICTAION_TIMOUT     (1 << 6)
