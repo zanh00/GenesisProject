@@ -18,6 +18,7 @@
 #include "SpeedEstimation.h"
 #include "EspComms.h"
 #include "LongitudinalControl.h"
+#include "LateralControl.h"
 #include "ProjectConfig.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -159,15 +160,26 @@ void AppCM7_Main()
     // HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
 
 
-    if( (xTaskCreate(Main_Task, "Main task", 512, NULL, 4, NULL)) != pdPASS )
-    {
-        Error_Handler();
-    }
+    // if( (xTaskCreate(Main_Task, "Main task", 512, NULL, 4, NULL)) != pdPASS )
+    // {
+    //     Error_Handler();
+    // }
 
-    vTaskStartScheduler();
+    // vTaskStartScheduler();
+
+    testFuncInit();
+
+    uint32_t tickPeriod = (uint32_t)HAL_GetTickFreq();
+    uint32_t execPeriod = 50 * tickPeriod;
 
     while(1)
     {
+        uint32_t startTime = HAL_GetTick() * tickPeriod;
+        testFunc();
+        uint32_t endTime = HAL_GetTick() * tickPeriod;
+        uint32_t execTime = endTime - startTime;
+
+        HAL_Delay(execPeriod - execTime);
 
     }
 }
