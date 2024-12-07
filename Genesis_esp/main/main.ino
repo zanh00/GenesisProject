@@ -22,7 +22,7 @@ bool conctd = true;
 
 char stmMessage[10] = "000000000";
 bool stmRxComplete = false;
-bool rxComplete = false;
+bool mqttRxComplete = false;
 char mqttMessage[50];
 
 static unsigned long lastSendTime = 0;
@@ -78,7 +78,7 @@ void callback(char* topic, byte* payload, unsigned int length)
       break;
     }
   }
-  rxComplete = true;
+  mqttRxComplete = true;
 }
 
 void reconnect() 
@@ -128,7 +128,7 @@ void setup()
   setup_mqtt();
   client.setCallback(callback);
   client.setKeepAlive(60);
-  //SerialUART.begin(115200, SERIAL_8N1, 23, 22); // 22 -> tx, 23 -> rx
+  SerialUART.begin(115200, SERIAL_8N1, 23, 22); // 22 -> tx, 23 -> rx
   //SerialUART.setTimeout(20);
   //pinMode(16, OUTPUT);
 }
@@ -141,27 +141,29 @@ void loop()
   }
   client.loop();
 
-  if( rxComplete )
+  if( mqttRxComplete )
   {
     debugPrint(mqttMessage);
-    rxComplete = false;
+    SerialUART.write(mqttMessage);
+    mqttRxComplete = false;
   }
 
   if( stmRxComplete )
   {
     //debugPrint();
-    debugPrint(stmMessage);
+    //debugPrint(stmMessage);
+    publish_message(stmMessage);
     stmRxComplete = false;
   }
 
-  if (millis() - lastSendTime > 2000) 
-  {
-    lastSendTime = millis();
-    publish_message(stmMessage);
-    debugPrint("RSSI: ");
-    //debugPrint(WiFi.RSSI());  // doesn't work
-    //Serial.print(WiFi.RSSI())
-  }
+  // if (millis() - lastSendTime > 2000) 
+  // {
+  //   lastSendTime = millis();
+  //   publish_message(stmMessage);
+  //   debugPrint("RSSI: ");
+  //   //debugPrint(WiFi.RSSI());  // doesn't work
+  //   //Serial.print(WiFi.RSSI())
+  // }
 
   checkUart();
 }

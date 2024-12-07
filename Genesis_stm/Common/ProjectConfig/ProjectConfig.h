@@ -19,7 +19,7 @@
 
 #define ID_COMMAND_FLAG                                 1
 #define ID_REQUESTED_DIAGNOSTIC                         2
-#define ID_LONGITUDINAL_REQUESTED_SPEED                              3
+#define ID_LONGITUDINAL_REQUESTED_SPEED                 3
 #define ID_PERIODIC_COMMS_CHECHK                        4
 #define ID_STATUS_FLAG                                  5
 #define ID_LONGITUDINAL_AUTOMODE_DIRECTION_SELECTION    6
@@ -30,6 +30,8 @@
 // Status Flags
 //////////////////////////////////////////////////////////////////////////////
 
+#define SF_SPEED_ESTIMATION_TASK_ACTIVE (1 << 1)
+#define SF_LONG_CONTROL_TASK_ACTIVE     (1 << 3)
 #define SF_ESP_TRANSMISSION_OVERLOD     (1 << 5)
 #define SF_ESP_COMMUNICTAION_TIMOUT     (1 << 6)
 

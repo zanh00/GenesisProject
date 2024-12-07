@@ -96,7 +96,7 @@ void EspComms_ReceiverTask(void* pvParameters)
             NOTE: Known limitation: if the application is left running in the timeout state, than
             once the tick timer makes a full circle a false acquisition can be astablished for the 
             duration of ESP_COMMS_CONNECTION_TIMEMOUT. This is due to the timer resolution and
-            the way the timout is being calculated.  
+            the way the timeout is being calculated.  
         
         */        
         if( isTimedOut )
@@ -142,6 +142,100 @@ void EspComms_TransmitterTask(void* pveParameters)
 //////////////////////////////////////////////////////////////////////////////
 // Function Definitions 
 //////////////////////////////////////////////////////////////////////////////
+
+static bool EspComms_OnTransferRequest(Message_t* messageToSend)
+{
+    BaseType_t          result;
+    HAL_StatusTypeDef   status      = HAL_OK;
+    bool                messageSent  = false;
+
+    if( Serializer_SerializeForESP(messageToSend->Id, messageToSend->Data.U32, gDmaTxBuffer) )
+    {
+        status = HAL_UART_Transmit_DMA(&huart2, gDmaTxBuffer, sizeof(gDmaTxBuffer));
+
+        if( status != HAL_OK )
+        {
+            // Uart Error //TODO:
+        }
+        else
+        {
+            messageSent = true;
+        }
+    }
+    else
+    {
+        // error, data can't be serialized //TODO:
+    }
+
+    return messageSent;
+}
+
+static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
+{
+    Message_t   receivedMessage;
+
+    if( Seriazlizer_Deserialize(gEspComms.rxBuffer, &(receivedMessage.Id), &(receivedMessage.Data.U32)) )
+    {
+        switch (receivedMessage.Id)
+        {
+        case ID_COMMAND_FLAG:
+            xQueueOverwrite(q_UserCommand, &(receivedMessage.Data.U32));
+            break;
+        case ID_LONGITUDINAL_AUTOMODE_DIRECTION_SELECTION:
+        case ID_LONGITUDINAL_SET_ACCELERATION:
+        case ID_LONGITUDINAL_MANUAL_CONTROL:
+            if( xQueueSendToBack(q_LongitudinalTaskData, &receivedMessage, WAIT_FOR_QUEUE_MS) != pdPASS )
+            {
+                //TODO: Longitudinal task overload
+            }
+        
+        default:
+            //TODO: set unkonw ID Flag
+            return; // unrecognised ID -> exit the function
+            break;
+        }
+
+        // any valid message received counts as a communications check
+        *lastCommsCheck_ticks = xTaskGetTickCount();
+        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
+
+        //TODO: switch all other possible IDs and send them to appropriate queues 
+
+    }
+    else
+    {
+        // message not valid
+    }
+}
+
+static bool EspComms_ticksToTimeout(const TickType_t lastCheck, TickType_t* const delayUnitlTimeout)
+{
+    const   TickType_t  currentTick             = xTaskGetTickCount();
+            TickType_t  ticksElapsed            = 0;
+            bool        isConnectionTimemedOut  = false;
+
+    // check for overflow
+    if( currentTick < lastCheck )
+    {
+        ticksElapsed = U32_MAX_VALUE - lastCheck + currentTick;
+    }
+    else
+    {
+        ticksElapsed = currentTick - lastCheck;
+    }
+
+    if( ticksElapsed >= ESP_COMMS_CONNECTION_TIMEMOUT )
+    {
+        isConnectionTimemedOut  = true;
+        *delayUnitlTimeout      = 0;
+    }
+    else
+    {
+        *delayUnitlTimeout = ESP_COMMS_CONNECTION_TIMEMOUT - ticksElapsed;
+    }
+
+    return isConnectionTimemedOut;
+}
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -192,99 +286,4 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
             portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
         }
     }
-}
-
-static bool EspComms_OnTransferRequest(Message_t* messageToSend)
-{
-    BaseType_t          result;
-    HAL_StatusTypeDef   status      = HAL_OK;
-    bool                messageSent  = false;
-
-    if( Serializer_SerializeForESP(messageToSend->Id, messageToSend->Data.U32, gDmaTxBuffer) )
-    {
-        status = HAL_UART_Transmit_DMA(&huart2, gDmaTxBuffer, sizeof(gDmaTxBuffer));
-
-        if( status != HAL_OK )
-        {
-            // Uart Error //TODO:
-        }
-        else
-        {
-            messageSent = true;
-        }
-    }
-    else
-    {
-        // error, data can't be serialized //TODO:
-    }
-
-    return messageSent;
-}
-
-static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
-{
-    Message_t   receivedMessage;
-
-    if( Seriazlizer_Deserialize(gEspComms.rxBuffer, &(receivedMessage.Id), &(receivedMessage.Data.U32)) )
-    {
-        if( receivedMessage.Id == ID_PERIODIC_COMMS_CHECHK )
-        {
-            *lastCommsCheck_ticks = xTaskGetTickCount();
-        }
-        else
-        {
-            switch (receivedMessage.Id)
-            {
-            case ID_COMMAND_FLAG:
-                xQueueOverwrite(q_UserCommand, &(receivedMessage.Data.U32));
-                break;
-            case ID_LONGITUDINAL_AUTOMODE_DIRECTION_SELECTION:
-            case ID_LONGITUDINAL_SET_ACCELERATION:
-            case ID_LONGITUDINAL_MANUAL_CONTROL:
-                if( xQueueSendToBack(q_LongitudinalTaskData, &receivedMessage, WAIT_FOR_QUEUE_MS) != pdPASS )
-                {
-                    //TODO: Longitudinal task overload
-                }
-            
-            default:
-                //TODO: set unkonw ID Flag
-                break;
-            }
-        }
-
-        
-
-        //TODO: switch all other possible IDs and send them to appropriate queues 
-
-
-    }
-}
-
-static bool EspComms_ticksToTimeout(const TickType_t lastCheck, TickType_t* const delayUnitlTimeout)
-{
-    const   TickType_t  currentTick             = xTaskGetTickCount();
-            TickType_t  ticksElapsed            = 0;
-            bool        isConnectionTimemedOut  = false;
-
-    // check for overflow
-    if( currentTick < lastCheck )
-    {
-        ticksElapsed = U32_MAX_VALUE - lastCheck + currentTick;
-    }
-    else
-    {
-        ticksElapsed = currentTick - lastCheck;
-    }
-
-    if( ticksElapsed >= ESP_COMMS_CONNECTION_TIMEMOUT )
-    {
-        isConnectionTimemedOut  = true;
-        *delayUnitlTimeout      = 0;
-    }
-    else
-    {
-        *delayUnitlTimeout = ESP_COMMS_CONNECTION_TIMEMOUT - ticksElapsed;
-    }
-
-    return isConnectionTimemedOut;
 }
