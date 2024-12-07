@@ -127,6 +127,11 @@ void Main_Task(void* pvParameters)
         Error_Handler();
     }
 
+    if( (xTaskCreate(LateralControl_Task, "Steer control task", 256, NULL, 5, NULL)) != pdPASS )
+    {
+        Error_Handler();
+    }
+
     lastWakeTime = xTaskGetTickCount();
 
     while(1)
@@ -149,37 +154,15 @@ void Main_Task(void* pvParameters)
 
 void AppCM7_Main()
 {
-    const uint32_t timer2Clk = ClockHandling_GetTimerClkFreq(&htim2);
-    const uint32_t sysClk   = HAL_RCC_GetSysClockFreq();
-    uint32_t CCRmin = 0; 
-    uint32_t CCRmax = 0;
+    if( (xTaskCreate(Main_Task, "Main task", 512, NULL, 4, NULL)) != pdPASS )
+    {
+        Error_Handler();
+    }
 
-    //Steering_PWMInit(timer2Clk, sysClk, &CCRmin, &CCRmax);
-    // TIM2->CCR1 = CCRmax;
-    // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-    // HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
-
-
-    // if( (xTaskCreate(Main_Task, "Main task", 512, NULL, 4, NULL)) != pdPASS )
-    // {
-    //     Error_Handler();
-    // }
-
-    // vTaskStartScheduler();
-
-    testFuncInit();
-
-    uint32_t tickPeriod = (uint32_t)HAL_GetTickFreq();
-    uint32_t execPeriod = 50 * tickPeriod;
+    vTaskStartScheduler();
 
     while(1)
     {
-        uint32_t startTime = HAL_GetTick() * tickPeriod;
-        testFunc();
-        uint32_t endTime = HAL_GetTick() * tickPeriod;
-        uint32_t execTime = endTime - startTime;
-
-        HAL_Delay(execPeriod - execTime);
 
     }
 }
@@ -200,37 +183,6 @@ static void SendStatusUpdateCallback(TimerHandle_t xTimer)
     }
 }
 
-static void Steering_PWMInit(const uint32_t internalTimerClock, const uint32_t sysclk, uint32_t* const CCRmin, uint32_t* const CCRmax)
-{
-    uint8_t     presc   = 0u;
-    uint8_t     freq    = 50u;
-    uint8_t     Dmin    = 5u;
-    uint8_t     Dmax    = 10u;
-    uint32_t    ARR     = 0u;
-    uint32_t    timClk  = 0u;
-
-    if( sysclk < 100000000 ) // 100MHz
-    {
-        presc = 4;
-    }
-    else
-    {
-        presc = 8;
-    }
-
-    timClk  = internalTimerClock / presc;
-    ARR     = timClk / freq;
-
-    *CCRmin = (Dmin * ARR) / 100;
-    *CCRmax = (Dmax * ARR) / 100;
-
-    htim2.Init.Prescaler    = presc - 1;
-    htim2.Init.Period       = ARR;
-    if( HAL_TIM_Base_Init(&htim2) != HAL_OK )
-    {
-      Error_Handler();
-    }
-}
 
 
 void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName )

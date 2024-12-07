@@ -41,7 +41,6 @@
 // Defines 
 //////////////////////////////////////////////////////////////////////////////
 
-#define LONGITUDINAL_CONTROL_PERIOD_MS  50
 #define WAIT_MODE_EVENT                 pdMS_TO_TICKS(200)
 #define MANUAL_COMMAND_TIMEOUT_TICKS    pdMS_TO_TICKS(200)
 

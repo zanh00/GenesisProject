@@ -14,30 +14,12 @@
 // Includes 
 //////////////////////////////////////////////////////////////////////////////
 
-#include "AppMainCM7.h"
-#include "tim.h"
-#include "ClockHandling.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-
 #include <string.h>
 
 //////////////////////////////////////////////////////////////////////////////
 // Defines 
 //////////////////////////////////////////////////////////////////////////////
 
-#define DMA_BUFFER __attribute__((section(".sram1")))
-
-#define SPEEDESTIMATION_SAMPLE_COUNT    4
-
-#define TYRE_DIAMETE                0.165
-#define GEAR_WHEEL_TEETH            20
-#define PI                          3.14159
-
-#define SPEEDESTIMATION_COEFICIENT  ((TYRE_DIAMETE * PI) / GEAR_WHEEL_TEETH)
-
-#define SPEEDESTIMATION_PERIOD_MS   50
 
 //////////////////////////////////////////////////////////////////////////////
 // Global Variables 

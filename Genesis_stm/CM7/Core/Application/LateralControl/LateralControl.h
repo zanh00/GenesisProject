@@ -2,7 +2,7 @@
 /*
  *  LateralControl.h
  *  
- *  //TODO: Description
+ *  Module for controlling vehicle steering angle with MPC controller.
  * 
  *  Created on: Dec 1, 2024
  *      Author: Žan Hertiš
@@ -16,11 +16,11 @@
 // Includes 
 //////////////////////////////////////////////////////////////////////////////
 
-#include "AppMainCM7.h"
-#include "ProjectConfig.h"
+//////////////////////////////////////////////////////////////////////////////
+// FreeRTOS Task
+//////////////////////////////////////////////////////////////////////////////
 
-void testFuncInit();
-void testFunc();
+void LateralControl_Task(void* pvParameter);
 
 
 #endif /* LATERAL_CONTORL */
