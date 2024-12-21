@@ -100,7 +100,7 @@ bool Serializer_SerializeForESP(const uint8_t id, const uint32_t data, uint8_t* 
     serializedData[2] = lsbAscii;
 
     // Serialize data field 
-    for( uint8_t i = 0; i < ESP_DATA_FIELD_SIZE; i++ )
+    for( uint8_t i = 0; i < SERIALIZER_DATA_FIELD_SIZE; i++ )
     { 
         uint8_t dataByte        = (data >> (8 * i)) & 0xFF;
         Serializer_ByteToAscii(dataByte, &lsbAscii, &msbAscii);
@@ -130,7 +130,7 @@ bool Seriazlizer_Deserialize(const uint8_t* const serializedData, uint8_t* const
     // Deserialize data field
     *data = 0;
 
-    for (uint8_t i = 0; i < ESP_DATA_FIELD_SIZE; i++) {
+    for (uint8_t i = 0; i < SERIALIZER_DATA_FIELD_SIZE; i++) {
         lsbAscii = serializedData[index++];
         msbAscii = serializedData[index++];
         

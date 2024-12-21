@@ -39,6 +39,8 @@ TimerHandle_t       t_statusTimer;
 QueueHandle_t       q_UserCommand           = NULL;
 QueueHandle_t       q_DiagnosticData        = NULL;
 QueueHandle_t       q_LongitudinalTaskData  = NULL;
+QueueHandle_t       q_Curvature             = NULL;
+QueueHandle_t       q_LateralDeviation      = NULL;
 QueueHandle_t       q_speed                 = NULL;
 
 EventGroupHandle_t  e_commandFlags          = NULL;
@@ -89,6 +91,8 @@ void Main_Task(void* pvParameters)
     q_UserCommand           = xQueueCreate(1, sizeof(uint32_t));
     q_DiagnosticData        = xQueueCreate(5, sizeof(Message_t));
     q_LongitudinalTaskData  = xQueueCreate(5, sizeof(Message_t));
+    q_Curvature             = xQueueCreate(1, sizeof(float));
+    q_LateralDeviation      = xQueueCreate(1, sizeof(float));
     q_speed                 = xQueueCreate(1, sizeof(uint32_t));
 
     t_statusTimer = xTimerCreate("Status timer", SEND_STATUS_FLAG_PERIOD, pdTRUE, NULL, SendStatusUpdateCallback);

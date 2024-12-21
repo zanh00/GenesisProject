@@ -23,13 +23,12 @@
 #define EVENT_RX_COMPLETE               (1 << 1)
 
 #define ESP_COMMS_CONNECTION_TIMEMOUT   pdMS_TO_TICKS(1000)
-#define U32_MAX_VALUE                   4294967295
 #define WAIT_FOR_QUEUE_MS               pdMS_TO_TICKS(10)
 
 typedef struct EspComms
 {
     bool    waitForStartByte;
-    uint8_t rxBuffer[ESP_PACKET_SIZE - 1];
+    uint8_t rxBuffer[SERIALIZER_PACKET_SIZE - 1];
 } EspComms_t;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -41,8 +40,8 @@ EspComms_t gEspComms = {
     .rxBuffer           = {0}
 };
 
-DMA_BUFFER uint8_t gDmaTxBuffer[ESP_PACKET_SIZE]        = {0};
-DMA_BUFFER uint8_t gDmaRxBuffer[ESP_PACKET_SIZE - 1]    = {0};
+DMA_BUFFER uint8_t gDmaTxBuffer[SERIALIZER_PACKET_SIZE]        = {0};
+DMA_BUFFER uint8_t gDmaRxBuffer[SERIALIZER_PACKET_SIZE - 1]    = {0};
 
 EventGroupHandle_t e_uartFlags = NULL;
 
@@ -101,13 +100,13 @@ void EspComms_ReceiverTask(void* pvParameters)
         */        
         if( isTimedOut )
         {
-            xEventGroupSetBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMOUT);
+            xEventGroupSetBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMEOUT);
             delayUntilTimeout_ticks = portMAX_DELAY;
         }
         else
         {
             // clear the comms timeout flag
-            xEventGroupClearBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMOUT);
+            xEventGroupClearBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMEOUT);
         }
     }
 }
@@ -184,10 +183,11 @@ static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
         case ID_LONGITUDINAL_AUTOMODE_DIRECTION_SELECTION:
         case ID_LONGITUDINAL_SET_ACCELERATION:
         case ID_LONGITUDINAL_MANUAL_CONTROL:
-            if( xQueueSendToBack(q_LongitudinalTaskData, &receivedMessage, WAIT_FOR_QUEUE_MS) != pdPASS )
+            if( xQueueSendToBack(q_LongitudinalTaskData, &receivedMessage, WAIT_FOR_QUEUE_MS) != pdTRUE )
             {
                 //TODO: Longitudinal task overload
             }
+            break;
         
         default:
             //TODO: set unkonw ID Flag
@@ -217,7 +217,7 @@ static bool EspComms_ticksToTimeout(const TickType_t lastCheck, TickType_t* cons
     // check for overflow
     if( currentTick < lastCheck )
     {
-        ticksElapsed = U32_MAX_VALUE - lastCheck + currentTick;
+        ticksElapsed = UINT32_MAX - lastCheck + currentTick;
     }
     else
     {

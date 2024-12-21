@@ -44,6 +44,13 @@
 #define ID_LONGITUDINAL_MANUAL_CONTROL                  8  
 
 //////////////////////////////////////////////////////////////////////////////
+// Jetson <-> STM Message Library
+//////////////////////////////////////////////////////////////////////////////
+
+#define ID_CURVATURE                                    128
+#define ID_LATERAL_DEVIATION                            129
+
+//////////////////////////////////////////////////////////////////////////////
 // Status Flags
 //////////////////////////////////////////////////////////////////////////////
 
@@ -51,7 +58,8 @@
 #define SF_LATERAL_CONTROL_TASK_ACTIVE  (1 << 2)
 #define SF_LONG_CONTROL_TASK_ACTIVE     (1 << 3)
 #define SF_ESP_TRANSMISSION_OVERLOD     (1 << 5)
-#define SF_ESP_COMMUNICTAION_TIMOUT     (1 << 6)
+#define SF_ESP_COMMUNICTAION_TIMEOUT    (1 << 6)
+#define SF_JETSON_COMMUNICTAION_TIMEOUT (1 << 7)
 
 
 
