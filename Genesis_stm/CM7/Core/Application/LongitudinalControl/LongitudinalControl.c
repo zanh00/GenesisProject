@@ -55,9 +55,6 @@
 #define MANUAL_CONTROL_ACCELERATION     180
 #define MANUAL_CONTROL_SPEED            30
 
-#define EVENT_MANUAL_DRIVE              (1 << 2)
-#define EVENT_LANE_KEEP_MODE            (1 << 3)
-
 #define PID_KP                          1
 #define PID_KI                          0.1
 #define PID_KD                          0
@@ -177,7 +174,7 @@ void LongitudinalControl_Task(void* pvParameters)
             }
             LongitudinalControl_AutomaticMode();
         }
-        else if(gLongitudinalControl.speed != 0)
+        else if( gLongitudinalControl.speed != 0 )
         { 
             LongitudinalControl_StopTheVehicle();   
         }

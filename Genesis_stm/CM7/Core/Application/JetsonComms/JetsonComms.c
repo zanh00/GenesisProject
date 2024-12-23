@@ -14,6 +14,7 @@
 
 #include "JetsonComms.h"
 #include "Serializer.h"
+#include <string.h>
 
 //////////////////////////////////////////////////////////////////////////////
 // Defines 
@@ -27,7 +28,7 @@
 typedef struct JetsonComms
 {
     bool    waitForStartByte;
-    uint8_t rxBuffer[SERIALIZER_DATA_FIELD_SIZE];
+    uint8_t rxBuffer[SERIALIZER_PACKET_SIZE - 1];
 } JetsonComms_t;
 
 //////////////////////////////////////////////////////////////////////////////

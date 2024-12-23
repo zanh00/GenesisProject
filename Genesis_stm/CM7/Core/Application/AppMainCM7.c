@@ -158,7 +158,7 @@ void Main_Task(void* pvParameters)
 
 void AppCM7_Main()
 {
-    if( (xTaskCreate(Main_Task, "Main task", 512, NULL, 4, NULL)) != pdPASS )
+    if( (xTaskCreate(Main_Task, "Main task", 1024, NULL, 4, NULL)) != pdPASS )
     {
         Error_Handler();
     }

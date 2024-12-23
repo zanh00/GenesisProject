@@ -61,6 +61,12 @@
 #define SF_ESP_COMMUNICTAION_TIMEOUT    (1 << 6)
 #define SF_JETSON_COMMUNICTAION_TIMEOUT (1 << 7)
 
+//////////////////////////////////////////////////////////////////////////////
+// Command Flags
+//////////////////////////////////////////////////////////////////////////////
+
+#define EVENT_MANUAL_DRIVE              (1 << 2)
+#define EVENT_LANE_KEEP_MODE            (1 << 3)
 
 
 
