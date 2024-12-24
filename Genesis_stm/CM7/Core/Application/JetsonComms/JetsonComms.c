@@ -74,7 +74,7 @@ void JetsonComms_Task(void *pvParameters)
 
         if( (eventBits & EVENT_RX_COMPLETE) != 0 )  // EVENT_RX_COMPLETE is set
         {
-            // on message received
+            JetsonComms_OnMessageReceived();
             eventBits = xEventGroupClearBits(e_spiFlags, EVENT_RX_COMPLETE);
             if( timeout )
             {
@@ -101,6 +101,7 @@ static void JetsonComms_OnMessageReceived(void)
 
     if( Seriazlizer_Deserialize(gJetsonComms.rxBuffer, &(rxMessage.Id), &(rxMessage.Data.U32)) )
     {
+        HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
         switch( rxMessage.Id )
         {
             case ID_CURVATURE:

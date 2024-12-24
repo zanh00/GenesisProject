@@ -19,6 +19,7 @@
 #include "EspComms.h"
 #include "LongitudinalControl.h"
 #include "LateralControl.h"
+#include "JetsonComms.h"
 #include "ProjectConfig.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -116,7 +117,7 @@ void Main_Task(void* pvParameters)
         Error_Handler();
     }
 
-    if( (xTaskCreate(EspComms_ReceiverTask, "Receiver task", 128, NULL, 4, NULL)) != pdPASS )
+    if( (xTaskCreate(EspComms_ReceiverTask, "Receiver task", 128, NULL, 3, NULL)) != pdPASS )
     {
         Error_Handler();
     }
@@ -131,7 +132,12 @@ void Main_Task(void* pvParameters)
         Error_Handler();
     }
 
-    if( (xTaskCreate(LateralControl_Task, "Steer control task", 256, NULL, 5, NULL)) != pdPASS )
+    if( (xTaskCreate(LateralControl_Task, "Steer control task", 256, NULL, 4, NULL)) != pdPASS )
+    {
+        Error_Handler();
+    }
+
+    if( (xTaskCreate(JetsonComms_Task, "Jetson task", 128, NULL, 1, NULL)) != pdPASS )
     {
         Error_Handler();
     }
@@ -158,7 +164,7 @@ void Main_Task(void* pvParameters)
 
 void AppCM7_Main()
 {
-    if( (xTaskCreate(Main_Task, "Main task", 1024, NULL, 4, NULL)) != pdPASS )
+    if( (xTaskCreate(Main_Task, "Main task", 1024, NULL, 3, NULL)) != pdPASS )
     {
         Error_Handler();
     }
@@ -191,6 +197,7 @@ static void SendStatusUpdateCallback(TimerHandle_t xTimer)
 
 void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName )
 {
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
     while(1)
     {
 
