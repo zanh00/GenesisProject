@@ -131,14 +131,14 @@ bool Seriazlizer_Deserialize(const uint8_t* const serializedData, uint8_t* const
     *data = 0;
 
     for (uint8_t i = 0; i < SERIALIZER_DATA_FIELD_SIZE; i++) {
-        lsbAscii = serializedData[index++];
         msbAscii = serializedData[index++];
+        lsbAscii = serializedData[index++];
         
         if (!Serializer_AsciiToByte(lsbAscii, msbAscii, &tempByte)) {
             return false;
         }
 
-        *data |= (uint32_t)tempByte << (8 * i);
+        *data |= (uint32_t)tempByte << (8 * (SERIALIZER_DATA_FIELD_SIZE - 1 - i));
     }
 
     return true;

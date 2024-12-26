@@ -66,7 +66,8 @@ void JetsonComms_Task(void *pvParameters)
     }
 
     gJetsonComms.waitForStartByte = true;
-    HAL_SPI_Receive_IT(&hspi1,gJetsonDMABuffer, 1);
+    memset(&gJetsonDMABuffer[0], 0, sizeof(gJetsonDMABuffer));
+    HAL_SPI_Receive_IT(&hspi1,&gJetsonDMABuffer[0], 1);
     
     while(1)
     {
@@ -106,9 +107,10 @@ static void JetsonComms_OnMessageReceived(void)
         {
             case ID_CURVATURE:
                 xQueueOverwrite(q_Curvature, &rxMessage.Data.F);
+                break;
             case ID_LATERAL_DEVIATION:
                 xQueueOverwrite(q_LateralDeviation, &rxMessage.Data.F);
-
+                break;
             default:
                 // Unrecognised ID
                 break;
@@ -136,16 +138,18 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef* hspi)
         if( gJetsonDMABuffer[0] == 'Z' )
         {
             gJetsonComms.waitForStartByte = false;
-            HAL_UART_Receive_DMA(&huart2, gJetsonDMABuffer, sizeof(gJetsonDMABuffer));
+            HAL_SPI_Receive_DMA(&hspi1, &gJetsonDMABuffer[0], sizeof(gJetsonDMABuffer));
         }
-
-        HAL_UART_Receive_IT(&huart2, gJetsonDMABuffer, 1);
+        else
+        {
+            HAL_SPI_Receive_IT(&hspi1, &gJetsonDMABuffer[0], 1);
+        }    
     }
     else
     {
         memcpy(gJetsonComms.rxBuffer, gJetsonDMABuffer, sizeof(gJetsonDMABuffer));
         gJetsonComms.waitForStartByte = true;
-        HAL_UART_Receive_IT(&huart2, gJetsonDMABuffer, 1);
+        HAL_SPI_Receive_IT(&hspi1, &gJetsonDMABuffer[0], 1);
 
         result = xEventGroupSetBitsFromISR(e_spiFlags, EVENT_RX_COMPLETE, &xHigherPriorityTaskWoken);
 

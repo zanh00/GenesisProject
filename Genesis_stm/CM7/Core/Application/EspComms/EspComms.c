@@ -254,8 +254,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             gEspComms.waitForStartByte = false;
             HAL_UART_Receive_DMA(&huart2, gDmaRxBuffer, sizeof(gDmaRxBuffer));
         }
-
-        HAL_UART_Receive_IT(&huart2, gDmaRxBuffer, 1);
+        else
+        {
+            HAL_UART_Receive_IT(&huart2, gDmaRxBuffer, 1);
+        }
+        
     }
     else
     {

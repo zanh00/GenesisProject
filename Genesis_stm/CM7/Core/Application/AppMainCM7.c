@@ -53,7 +53,6 @@ EventGroupHandle_t  e_statusFlags           = NULL;
 // Function prototypes 
 //////////////////////////////////////////////////////////////////////////////
 
-static  void Steering_PWMInit               (const uint32_t internalTimerClock, const uint32_t sysclk, uint32_t* const CCRmin, uint32_t* const CCRmax);
         void vApplicationStackOverflowHook  (TaskHandle_t xTask, char *pcTaskName);
 static  void SendStatusUpdateCallback       (TimerHandle_t xTimer);
 
