@@ -31,7 +31,9 @@
 // FreeRTOS Task
 //////////////////////////////////////////////////////////////////////////////
 
-void JetsonComms_Task(void* pvParameters);
+void JetsonComms_Task           (void* pvParameters);
+void JetsonComms_UART1RxCallback(void);
+
 
 
 #endif /* JETSON_COMMS */

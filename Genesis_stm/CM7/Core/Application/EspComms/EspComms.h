@@ -50,6 +50,8 @@ extern EventGroupHandle_t   e_uartFlags;
 
 void EspComms_ReceiverTask      (void* pvParameters);
 void EspComms_TransmitterTask   (void* pveParameters);
+void EspComms_UART2RxCallback   (void);
+
 
 
 #endif /*  ESP_COMMS_H  */

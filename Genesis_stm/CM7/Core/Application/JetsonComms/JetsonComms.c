@@ -67,7 +67,7 @@ void JetsonComms_Task(void *pvParameters)
 
     gJetsonComms.waitForStartByte = true;
     memset(&gJetsonDMABuffer[0], 0, sizeof(gJetsonDMABuffer));
-    HAL_SPI_Receive_IT(&hspi1,&gJetsonDMABuffer[0], 1);
+    HAL_UART_Receive_IT(&huart1, gJetsonDMABuffer, 1);
     
     while(1)
     {
@@ -123,33 +123,30 @@ static void JetsonComms_OnMessageReceived(void)
 
 }
 
-void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef* hspi)
+
+void JetsonComms_UART1RxCallback(void)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     BaseType_t result;
-
-    if( hspi != &hspi1 )
-    {
-        return;
-    }
 
     if( gJetsonComms.waitForStartByte )
     {
         if( gJetsonDMABuffer[0] == 'Z' )
         {
             gJetsonComms.waitForStartByte = false;
-            HAL_SPI_Receive_DMA(&hspi1, &gJetsonDMABuffer[0], sizeof(gJetsonDMABuffer));
+            HAL_UART_Receive_DMA(&huart1, gJetsonDMABuffer, sizeof(gJetsonDMABuffer));
         }
         else
         {
-            HAL_SPI_Receive_IT(&hspi1, &gJetsonDMABuffer[0], 1);
-        }    
+            HAL_UART_Receive_IT(&huart1, gJetsonDMABuffer, 1);
+        }
+        
     }
     else
     {
         memcpy(gJetsonComms.rxBuffer, gJetsonDMABuffer, sizeof(gJetsonDMABuffer));
         gJetsonComms.waitForStartByte = true;
-        HAL_SPI_Receive_IT(&hspi1, &gJetsonDMABuffer[0], 1);
+        HAL_UART_Receive_IT(&huart1, gJetsonDMABuffer, 1);
 
         result = xEventGroupSetBitsFromISR(e_spiFlags, EVENT_RX_COMPLETE, &xHigherPriorityTaskWoken);
 
@@ -158,6 +155,5 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef* hspi)
             portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
         }
     }
-
 }
 

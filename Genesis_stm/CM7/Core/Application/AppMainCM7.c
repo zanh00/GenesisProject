@@ -203,3 +203,28 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName )
     }
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * This is an UART Receive complete callback function that is common for all
+ * UART peripherial. It is called by the UART ISR. As such it is used both by 
+ * EspComms and JetsonComms modules. Function checks which UART triggered the 
+ * callback and calls respective function that processes the data.
+ * 
+ * @param[in]   huart   pointer to UART handle
+ * 
+ * @return      void
+ * 
+ */
+//////////////////////////////////////////////////////////////////////////////
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if( huart == &huart1 )
+    {
+        JetsonComms_UART1RxCallback();
+    }
+    else if( huart == &huart2 )
+    {
+        EspComms_UART2RxCallback();
+    }
+}
+

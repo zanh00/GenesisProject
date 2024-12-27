@@ -237,15 +237,10 @@ static bool EspComms_ticksToTimeout(const TickType_t lastCheck, TickType_t* cons
     return isConnectionTimemedOut;
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+void EspComms_UART2RxCallback(void)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     BaseType_t result;
-
-    if( huart != &huart2 )
-    {
-        return;
-    }
 
     if( gEspComms.waitForStartByte )
     {
