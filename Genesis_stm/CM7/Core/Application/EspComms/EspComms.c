@@ -144,11 +144,20 @@ void EspComms_TransmitterTask(void* pveParameters)
 
 static bool EspComms_OnTransferRequest(Message_t* messageToSend)
 {
-    BaseType_t          result;
-    HAL_StatusTypeDef   status      = HAL_OK;
-    bool                messageSent  = false;
+    HAL_StatusTypeDef   status          = HAL_OK;
+    bool                messageSent     = false;
+    bool                isSerialized    = false;
 
-    if( Serializer_SerializeForESP(messageToSend->Id, messageToSend->Data.U32, gDmaTxBuffer) )
+    if( messageToSend->Id >= 128 )
+    {
+        isSerialized = Serializer_SerializeFloat(messageToSend->Id, messageToSend->Data.F, gDmaTxBuffer);
+    }
+    else
+    {
+        isSerialized = Serializer_SerializeUint32(messageToSend->Id, messageToSend->Data.U32, gDmaTxBuffer);
+    }
+
+    if( isSerialized )
     {
         status = HAL_UART_Transmit_DMA(&huart2, gDmaTxBuffer, sizeof(gDmaTxBuffer));
 

@@ -17,9 +17,15 @@
 // Timings
 //////////////////////////////////////////////////////////////////////////////
 
-#define LONGITUDINAL_CONTROL_PERIOD_MS  50
-#define LATERAL_CONTROL_PERIOD_MS       50
-#define SPEEDESTIMATION_PERIOD_MS       50
+#define LONGITUDINAL_CONTROL_PERIOD_MS          50
+#define LATERAL_CONTROL_PERIOD_MS               50
+#define SPEEDESTIMATION_PERIOD_MS               50
+
+// Period in which vehicle speed measurement will be sent out to diagnostic queue
+#define DIAGNOSTIC_SPEED_PERIOD_MS              500
+
+// Period with which lateral contorl module diagnostic data will be sent to diagnostic queue
+#define DIAGNOSTIC_LATERAL_CONTROL_PERIOD_MS    300
 
 //////////////////////////////////////////////////////////////////////////////
 // General
@@ -42,6 +48,7 @@
 #define ID_LONGITUDINAL_AUTOMODE_DIRECTION_SELECTION    6
 #define ID_LONGITUDINAL_SET_ACCELERATION                7
 #define ID_LONGITUDINAL_MANUAL_CONTROL                  8  
+#define ID_VEHICLE_SPEED                                130
 
 //////////////////////////////////////////////////////////////////////////////
 // Jetson <-> STM Message Library
@@ -65,8 +72,10 @@
 // Command Flags
 //////////////////////////////////////////////////////////////////////////////
 
-#define EVENT_MANUAL_DRIVE              (1 << 2)
-#define EVENT_LANE_KEEP_MODE            (1 << 3)
+#define COMMAND_MANUAL_DRIVE                    (1 << 2)
+#define COMMAND_LANE_KEEP_MODE                  (1 << 3)
+#define COMMAND_ENABLE_CURVATURE_DIAG           (1 << 4)
+#define COMMAND_ENABLE_LATERAL_DEVIATION_DIAG   (1 << 5)
 
 
 

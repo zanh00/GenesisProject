@@ -152,11 +152,11 @@ void LongitudinalControl_Task(void* pvParameters)
 
     while(1)
     {
-        events = xEventGroupWaitBits(e_commandFlags, EVENT_MANUAL_DRIVE | EVENT_LANE_KEEP_MODE, pdFALSE, pdFALSE, WAIT_MODE_EVENT);
+        events = xEventGroupWaitBits(e_commandFlags, COMMAND_MANUAL_DRIVE | COMMAND_LANE_KEEP_MODE, pdFALSE, pdFALSE, WAIT_MODE_EVENT);
 
         LongitudinalControl_ReadData();
 
-        if( (events & EVENT_MANUAL_DRIVE) != 0 )
+        if( (events & COMMAND_MANUAL_DRIVE) != 0 )
         {
             if( pidMode != MANUAL )
             {
@@ -165,7 +165,7 @@ void LongitudinalControl_Task(void* pvParameters)
             }
             LongitudinalControl_ManualControl();
         }
-        else if( (events & EVENT_LANE_KEEP_MODE) != 0 )
+        else if( (events & COMMAND_LANE_KEEP_MODE) != 0 )
         {
             if( pidMode != AUTOMATIC )
             {

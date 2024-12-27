@@ -42,7 +42,7 @@ JetsonComms_t gJetsonComms = {
 
 DMA_BUFFER uint8_t gJetsonDMABuffer[SERIALIZER_PACKET_SIZE - 1] = {0};
 
-EventGroupHandle_t e_spiFlags = NULL;
+EventGroupHandle_t e_uart1Flags = NULL;
 
 //////////////////////////////////////////////////////////////////////////////
 // Function prototypes 
@@ -58,9 +58,9 @@ void JetsonComms_Task(void *pvParameters)
     EventBits_t eventBits;
     bool        timeout     = false;    
 
-    e_spiFlags = xEventGroupCreate();
+    e_uart1Flags = xEventGroupCreate();
 
-    if( e_spiFlags == NULL )
+    if( e_uart1Flags == NULL )
     {
         Error_Handler();
     }
@@ -71,12 +71,12 @@ void JetsonComms_Task(void *pvParameters)
     
     while(1)
     {
-        eventBits = xEventGroupWaitBits(e_spiFlags, EVENT_RX_COMPLETE, pdFALSE, pdFALSE, JETSON_COMMS_NOT_ACITVE_TICKS);
+        eventBits = xEventGroupWaitBits(e_uart1Flags, EVENT_RX_COMPLETE, pdFALSE, pdFALSE, JETSON_COMMS_NOT_ACITVE_TICKS);
 
         if( (eventBits & EVENT_RX_COMPLETE) != 0 )  // EVENT_RX_COMPLETE is set
         {
             JetsonComms_OnMessageReceived();
-            eventBits = xEventGroupClearBits(e_spiFlags, EVENT_RX_COMPLETE);
+            eventBits = xEventGroupClearBits(e_uart1Flags, EVENT_RX_COMPLETE);
             if( timeout )
             {
                 xEventGroupClearBits(e_statusFlags, SF_JETSON_COMMUNICTAION_TIMEOUT);
@@ -148,7 +148,7 @@ void JetsonComms_UART1RxCallback(void)
         gJetsonComms.waitForStartByte = true;
         HAL_UART_Receive_IT(&huart1, gJetsonDMABuffer, 1);
 
-        result = xEventGroupSetBitsFromISR(e_spiFlags, EVENT_RX_COMPLETE, &xHigherPriorityTaskWoken);
+        result = xEventGroupSetBitsFromISR(e_uart1Flags, EVENT_RX_COMPLETE, &xHigherPriorityTaskWoken);
 
         if( result != pdFAIL )
         {

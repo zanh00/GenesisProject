@@ -27,7 +27,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #define NO_DELAY                    0
-#define SEND_STATUS_FLAG_PERIOD     pdMS_TO_TICKS(500)
+#define SEND_STATUS_FLAG_PERIOD     pdMS_TO_TICKS(1000)
 #define MAIN_TASK_PERIOD_MS         50
 
 //////////////////////////////////////////////////////////////////////////////
@@ -83,7 +83,6 @@ void Main_Task(void* pvParameters)
 {
     EventBits_t commandFlags = 0;
     BaseType_t  result;
-    Message_t   messageForEsp;
     TickType_t  lastWakeTime;
 
     const TickType_t    taskPeriod  = pdMS_TO_TICKS(MAIN_TASK_PERIOD_MS);
