@@ -23,13 +23,12 @@
 #define EVENT_RX_COMPLETE               (1 << 1)
 
 #define ESP_COMMS_CONNECTION_TIMEMOUT   pdMS_TO_TICKS(1000)
-#define U32_MAX_VALUE                   4294967295
 #define WAIT_FOR_QUEUE_MS               pdMS_TO_TICKS(10)
 
 typedef struct EspComms
 {
     bool    waitForStartByte;
-    uint8_t rxBuffer[ESP_PACKET_SIZE - 1];
+    uint8_t rxBuffer[SERIALIZER_PACKET_SIZE - 1];
 } EspComms_t;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -41,8 +40,8 @@ EspComms_t gEspComms = {
     .rxBuffer           = {0}
 };
 
-DMA_BUFFER uint8_t gDmaTxBuffer[ESP_PACKET_SIZE]        = {0};
-DMA_BUFFER uint8_t gDmaRxBuffer[ESP_PACKET_SIZE - 1]    = {0};
+DMA_BUFFER uint8_t gDmaTxBuffer[SERIALIZER_PACKET_SIZE]        = {0};
+DMA_BUFFER uint8_t gDmaRxBuffer[SERIALIZER_PACKET_SIZE - 1]    = {0};
 
 EventGroupHandle_t e_uartFlags = NULL;
 
@@ -101,13 +100,16 @@ void EspComms_ReceiverTask(void* pvParameters)
         */        
         if( isTimedOut )
         {
-            xEventGroupSetBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMOUT);
+            xEventGroupSetBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMEOUT);
             delayUntilTimeout_ticks = portMAX_DELAY;
+            HAL_GPIO_WritePin(Y_LED_GPIO_Port, Y_LED_Pin, GPIO_PIN_SET);
         }
         else
         {
             // clear the comms timeout flag
-            xEventGroupClearBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMOUT);
+            xEventGroupClearBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMEOUT);
+            HAL_GPIO_WritePin(Y_LED_GPIO_Port, Y_LED_Pin, GPIO_PIN_RESET);
+
         }
     }
 }
@@ -133,7 +135,7 @@ void EspComms_TransmitterTask(void* pveParameters)
             // if message was sent of to uart we add some delay in order not to overload esp since it is generaly a much slower device
             if( messageSent )
             {
-                vTaskDelay(pdMS_TO_TICKS(5));
+                vTaskDelay(pdMS_TO_TICKS(20));
             }
         }
     }
@@ -145,11 +147,20 @@ void EspComms_TransmitterTask(void* pveParameters)
 
 static bool EspComms_OnTransferRequest(Message_t* messageToSend)
 {
-    BaseType_t          result;
-    HAL_StatusTypeDef   status      = HAL_OK;
-    bool                messageSent  = false;
+    HAL_StatusTypeDef   status          = HAL_OK;
+    bool                messageSent     = false;
+    bool                isSerialized    = false;
 
-    if( Serializer_SerializeForESP(messageToSend->Id, messageToSend->Data.U32, gDmaTxBuffer) )
+    if( messageToSend->Id >= 128 )
+    {
+        isSerialized = Serializer_SerializeFloat(messageToSend->Id, messageToSend->Data.F, gDmaTxBuffer);
+    }
+    else
+    {
+        isSerialized = Serializer_SerializeUint32(messageToSend->Id, messageToSend->Data.U32, gDmaTxBuffer);
+    }
+
+    if( isSerialized )
     {
         status = HAL_UART_Transmit_DMA(&huart2, gDmaTxBuffer, sizeof(gDmaTxBuffer));
 
@@ -184,10 +195,11 @@ static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
         case ID_LONGITUDINAL_AUTOMODE_DIRECTION_SELECTION:
         case ID_LONGITUDINAL_SET_ACCELERATION:
         case ID_LONGITUDINAL_MANUAL_CONTROL:
-            if( xQueueSendToBack(q_LongitudinalTaskData, &receivedMessage, WAIT_FOR_QUEUE_MS) != pdPASS )
+            if( xQueueSendToBack(q_LongitudinalTaskData, &receivedMessage, WAIT_FOR_QUEUE_MS) != pdTRUE )
             {
                 //TODO: Longitudinal task overload
             }
+            break;
         
         default:
             //TODO: set unkonw ID Flag
@@ -197,7 +209,6 @@ static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
 
         // any valid message received counts as a communications check
         *lastCommsCheck_ticks = xTaskGetTickCount();
-        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 
         //TODO: switch all other possible IDs and send them to appropriate queues 
 
@@ -217,7 +228,7 @@ static bool EspComms_ticksToTimeout(const TickType_t lastCheck, TickType_t* cons
     // check for overflow
     if( currentTick < lastCheck )
     {
-        ticksElapsed = U32_MAX_VALUE - lastCheck + currentTick;
+        ticksElapsed = UINT32_MAX - lastCheck + currentTick;
     }
     else
     {
@@ -237,15 +248,10 @@ static bool EspComms_ticksToTimeout(const TickType_t lastCheck, TickType_t* cons
     return isConnectionTimemedOut;
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+void EspComms_UART2RxCallback(void)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     BaseType_t result;
-
-    if( huart != &huart2 )
-    {
-        return;
-    }
 
     if( gEspComms.waitForStartByte )
     {
@@ -254,8 +260,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             gEspComms.waitForStartByte = false;
             HAL_UART_Receive_DMA(&huart2, gDmaRxBuffer, sizeof(gDmaRxBuffer));
         }
-
-        HAL_UART_Receive_IT(&huart2, gDmaRxBuffer, 1);
+        else
+        {
+            HAL_UART_Receive_IT(&huart2, gDmaRxBuffer, 1);
+        }
+        
     }
     else
     {

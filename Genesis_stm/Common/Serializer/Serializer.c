@@ -14,6 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "Serializer.h"
+#include <string.h>
 
 //////////////////////////////////////////////////////////////////////////////
 // Global Variables 
@@ -86,7 +87,7 @@ static bool Serializer_AsciiToByte(const uint8_t lsbAscii, const uint8_t msbAsci
     return true;
 }
 
-bool Serializer_SerializeForESP(const uint8_t id, const uint32_t data, uint8_t* const serializedData)
+bool Serializer_SerializeUint32(const uint8_t id, const uint32_t data, uint8_t* const serializedData)
 {
     uint8_t lsbAscii    = 0;
     uint8_t msbAscii    = 0;
@@ -100,18 +101,50 @@ bool Serializer_SerializeForESP(const uint8_t id, const uint32_t data, uint8_t* 
     serializedData[2] = lsbAscii;
 
     // Serialize data field 
-    for( uint8_t i = 0; i < ESP_DATA_FIELD_SIZE; i++ )
+    for( uint8_t i = 0; i < SERIALIZER_DATA_FIELD_SIZE; i++ )
     { 
-        uint8_t dataByte        = (data >> (8 * i)) & 0xFF;
+        uint8_t dataByte        = (data >> (8 * (SERIALIZER_DATA_FIELD_SIZE - 1 - i))) & 0xFF;
         Serializer_ByteToAscii(dataByte, &lsbAscii, &msbAscii);
 
-        serializedData[index++] = lsbAscii;
         serializedData[index++] = msbAscii;
+        serializedData[index++] = lsbAscii;
     }
 
     return true;
 
 }
+
+bool Serializer_SerializeFloat(const uint8_t id, const float data, uint8_t* const serializedData)
+{
+    uint8_t lsbAscii    = 0;
+    uint8_t msbAscii    = 0;
+    uint8_t index       = 3; // Start of the data field
+
+    // Start byte
+    serializedData[0] = 'Z';
+
+    // Serialize ID
+    Serializer_ByteToAscii(id, &lsbAscii, &msbAscii);
+    serializedData[1] = msbAscii;
+    serializedData[2] = lsbAscii;
+
+    // Convert float to uint32_t (IEEE 754 format)
+    uint32_t floatAsUint;
+    memcpy(&floatAsUint, &data, sizeof(float));
+
+    // Serialize data field (float as uint32_t)
+    for (uint8_t i = 0; i < 4; i++) // 4 bytes for float
+    {
+        uint8_t dataByte = (floatAsUint >> (8 * (SERIALIZER_DATA_FIELD_SIZE - 1 - i))) & 0xFF;
+        Serializer_ByteToAscii(dataByte, &lsbAscii, &msbAscii);
+
+        serializedData[index++] = msbAscii;
+        serializedData[index++] = lsbAscii;
+    }
+
+    return true;
+}
+
 
 bool Seriazlizer_Deserialize(const uint8_t* const serializedData, uint8_t* const id, uint32_t* const data)
 {
@@ -130,15 +163,15 @@ bool Seriazlizer_Deserialize(const uint8_t* const serializedData, uint8_t* const
     // Deserialize data field
     *data = 0;
 
-    for (uint8_t i = 0; i < ESP_DATA_FIELD_SIZE; i++) {
-        lsbAscii = serializedData[index++];
+    for (uint8_t i = 0; i < SERIALIZER_DATA_FIELD_SIZE; i++) {
         msbAscii = serializedData[index++];
+        lsbAscii = serializedData[index++];
         
         if (!Serializer_AsciiToByte(lsbAscii, msbAscii, &tempByte)) {
             return false;
         }
 
-        *data |= (uint32_t)tempByte << (8 * i);
+        *data |= (uint32_t)tempByte << (8 * (SERIALIZER_DATA_FIELD_SIZE - 1 - i));
     }
 
     return true;

@@ -19,7 +19,6 @@
 
 #include "main.h"
 #include "i2c.h"
-#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -32,6 +31,8 @@
 //////////////////////////////////////////////////////////////////////////////
 // Defines 
 //////////////////////////////////////////////////////////////////////////////
+
+#define DMA_BUFFER __attribute__((section(".sram1")))
 
 typedef union {
     uint32_t    U32;
@@ -51,6 +52,8 @@ typedef struct Message
 
 extern QueueHandle_t q_UserCommand;
 extern QueueHandle_t q_DiagnosticData;
+extern QueueHandle_t q_Curvature;
+extern QueueHandle_t q_LateralDeviation;
 extern QueueHandle_t q_LongitudinalTaskData;
 extern QueueHandle_t q_speed;
 

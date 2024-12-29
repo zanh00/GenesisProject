@@ -16,6 +16,7 @@
                 "${workspaceFolder}/Genesis_stm/CM7/Core/Application/EspComms",
                 "${workspaceFolder}/Genesis_stm/CM7/Core/Application/LongitudinalControl",
                 "${workspaceFolder}/Genesis_stm/CM7/Core/Application/LateralControl",
+                "${workspaceFolder}/Genesis_stm/CM7/Core/Application/JetsonComms",
                 "${workspaceFolder}/Genesis_stm/CM7/Core/Application/LongitudinalControl/PID_Controller",
                 "${workspaceFolder}/Genesis_stm/Common/FreeRTOS/include",
                 "${workspaceFolder}/Genesis_stm/Common/FreeRTOS/portable_CM7/GCC/ARM_CM7/r0p1"

@@ -19,6 +19,7 @@
 #include "EspComms.h"
 #include "LongitudinalControl.h"
 #include "LateralControl.h"
+#include "JetsonComms.h"
 #include "ProjectConfig.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -26,7 +27,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #define NO_DELAY                    0
-#define SEND_STATUS_FLAG_PERIOD     pdMS_TO_TICKS(500)
+#define SEND_STATUS_FLAG_PERIOD     pdMS_TO_TICKS(1000)
 #define MAIN_TASK_PERIOD_MS         50
 
 //////////////////////////////////////////////////////////////////////////////
@@ -39,6 +40,8 @@ TimerHandle_t       t_statusTimer;
 QueueHandle_t       q_UserCommand           = NULL;
 QueueHandle_t       q_DiagnosticData        = NULL;
 QueueHandle_t       q_LongitudinalTaskData  = NULL;
+QueueHandle_t       q_Curvature             = NULL;
+QueueHandle_t       q_LateralDeviation      = NULL;
 QueueHandle_t       q_speed                 = NULL;
 
 EventGroupHandle_t  e_commandFlags          = NULL;
@@ -50,7 +53,6 @@ EventGroupHandle_t  e_statusFlags           = NULL;
 // Function prototypes 
 //////////////////////////////////////////////////////////////////////////////
 
-static  void Steering_PWMInit               (const uint32_t internalTimerClock, const uint32_t sysclk, uint32_t* const CCRmin, uint32_t* const CCRmax);
         void vApplicationStackOverflowHook  (TaskHandle_t xTask, char *pcTaskName);
 static  void SendStatusUpdateCallback       (TimerHandle_t xTimer);
 
@@ -81,7 +83,6 @@ void Main_Task(void* pvParameters)
 {
     EventBits_t commandFlags = 0;
     BaseType_t  result;
-    Message_t   messageForEsp;
     TickType_t  lastWakeTime;
 
     const TickType_t    taskPeriod  = pdMS_TO_TICKS(MAIN_TASK_PERIOD_MS);
@@ -89,6 +90,8 @@ void Main_Task(void* pvParameters)
     q_UserCommand           = xQueueCreate(1, sizeof(uint32_t));
     q_DiagnosticData        = xQueueCreate(5, sizeof(Message_t));
     q_LongitudinalTaskData  = xQueueCreate(5, sizeof(Message_t));
+    q_Curvature             = xQueueCreate(1, sizeof(float));
+    q_LateralDeviation      = xQueueCreate(1, sizeof(float));
     q_speed                 = xQueueCreate(1, sizeof(uint32_t));
 
     t_statusTimer = xTimerCreate("Status timer", SEND_STATUS_FLAG_PERIOD, pdTRUE, NULL, SendStatusUpdateCallback);
@@ -112,7 +115,7 @@ void Main_Task(void* pvParameters)
         Error_Handler();
     }
 
-    if( (xTaskCreate(EspComms_ReceiverTask, "Receiver task", 128, NULL, 4, NULL)) != pdPASS )
+    if( (xTaskCreate(EspComms_ReceiverTask, "Receiver task", 128, NULL, 3, NULL)) != pdPASS )
     {
         Error_Handler();
     }
@@ -127,6 +130,16 @@ void Main_Task(void* pvParameters)
         Error_Handler();
     }
 
+    if( (xTaskCreate(LateralControl_Task, "Steer control task", 256, NULL, 4, NULL)) != pdPASS )
+    {
+        Error_Handler();
+    }
+
+    if( (xTaskCreate(JetsonComms_Task, "Jetson task", 128, NULL, 1, NULL)) != pdPASS )
+    {
+        Error_Handler();
+    }
+
     lastWakeTime = xTaskGetTickCount();
 
     while(1)
@@ -135,7 +148,13 @@ void Main_Task(void* pvParameters)
 
         if( result == pdPASS )
         {
-            commandFlags = xEventGroupSetBits(e_commandFlags, commandFlags);
+            // xEventGroupSetBits will only set bits but will not clear any. To clear
+            // bits we need to invert the command flag and call clearbits funciton.
+            (void)xEventGroupSetBits(e_commandFlags, commandFlags);
+            // The 8 MSB bits are used by the kernel and must not be cleared
+            commandFlags = (~commandFlags) & 0x00FFFFFF;
+            (void)xEventGroupClearBits(e_commandFlags, commandFlags);
+            
         }
 
         // Sets the delay time which is equal to taskPeriod - task execution time
@@ -149,37 +168,15 @@ void Main_Task(void* pvParameters)
 
 void AppCM7_Main()
 {
-    const uint32_t timer2Clk = ClockHandling_GetTimerClkFreq(&htim2);
-    const uint32_t sysClk   = HAL_RCC_GetSysClockFreq();
-    uint32_t CCRmin = 0; 
-    uint32_t CCRmax = 0;
+    if( (xTaskCreate(Main_Task, "Main task", 1024, NULL, 3, NULL)) != pdPASS )
+    {
+        Error_Handler();
+    }
 
-    //Steering_PWMInit(timer2Clk, sysClk, &CCRmin, &CCRmax);
-    // TIM2->CCR1 = CCRmax;
-    // HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-    // HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
-
-
-    // if( (xTaskCreate(Main_Task, "Main task", 512, NULL, 4, NULL)) != pdPASS )
-    // {
-    //     Error_Handler();
-    // }
-
-    // vTaskStartScheduler();
-
-    testFuncInit();
-
-    uint32_t tickPeriod = (uint32_t)HAL_GetTickFreq();
-    uint32_t execPeriod = 50 * tickPeriod;
+    vTaskStartScheduler();
 
     while(1)
     {
-        uint32_t startTime = HAL_GetTick() * tickPeriod;
-        testFunc();
-        uint32_t endTime = HAL_GetTick() * tickPeriod;
-        uint32_t execTime = endTime - startTime;
-
-        HAL_Delay(execPeriod - execTime);
 
     }
 }
@@ -200,44 +197,39 @@ static void SendStatusUpdateCallback(TimerHandle_t xTimer)
     }
 }
 
-static void Steering_PWMInit(const uint32_t internalTimerClock, const uint32_t sysclk, uint32_t* const CCRmin, uint32_t* const CCRmax)
-{
-    uint8_t     presc   = 0u;
-    uint8_t     freq    = 50u;
-    uint8_t     Dmin    = 5u;
-    uint8_t     Dmax    = 10u;
-    uint32_t    ARR     = 0u;
-    uint32_t    timClk  = 0u;
-
-    if( sysclk < 100000000 ) // 100MHz
-    {
-        presc = 4;
-    }
-    else
-    {
-        presc = 8;
-    }
-
-    timClk  = internalTimerClock / presc;
-    ARR     = timClk / freq;
-
-    *CCRmin = (Dmin * ARR) / 100;
-    *CCRmax = (Dmax * ARR) / 100;
-
-    htim2.Init.Prescaler    = presc - 1;
-    htim2.Init.Period       = ARR;
-    if( HAL_TIM_Base_Init(&htim2) != HAL_OK )
-    {
-      Error_Handler();
-    }
-}
 
 
 void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName )
 {
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
     while(1)
     {
 
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * This is an UART Receive complete callback function that is common for all
+ * UART peripherial. It is called by the UART ISR. As such it is used both by 
+ * EspComms and JetsonComms modules. Function checks which UART triggered the 
+ * callback and calls respective function that processes the data.
+ * 
+ * @param[in]   huart   pointer to UART handle
+ * 
+ * @return      void
+ * 
+ */
+//////////////////////////////////////////////////////////////////////////////
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if( huart == &huart1 )
+    {
+        JetsonComms_UART1RxCallback();
+    }
+    else if( huart == &huart2 )
+    {
+        EspComms_UART2RxCallback();
     }
 }
 

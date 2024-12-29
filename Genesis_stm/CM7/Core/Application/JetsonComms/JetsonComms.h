@@ -1,19 +1,14 @@
 //////////////////////////////////////////////////////////////////////////////
 /*
- *  LongitudinalControl.h
+ *  JetsonComms.h
  *  
- *  Module for controlling vehicle speed with the PID control.
- * 
- *  PID controller used in here can be found on github:
- *  https://github.com/tcleg/PID_Controller.git
- * 
- *  Created on: Oct 30, 2024
+ *  Created on: Dec 21, 2024
  *      Author: Žan Hertiš
  */
  ////////////////////////////////////////////////////////////////////////////
 
-#ifndef LONGITUDINAL_CONTROL
-#define LONGITUDINAL_CONTROL
+#ifndef JETSON_COMMS
+#define JETSON_COMMS
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -22,11 +17,11 @@
 
 #include "AppMainCM7.h"
 #include "ProjectConfig.h"
-#include "i2c.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // Defines 
 //////////////////////////////////////////////////////////////////////////////
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Global Variables 
@@ -36,7 +31,9 @@
 // FreeRTOS Task
 //////////////////////////////////////////////////////////////////////////////
 
-void LongitudinalControl_Task(void* pvParameters);
+void JetsonComms_Task           (void* pvParameters);
+void JetsonComms_UART1RxCallback(void);
 
 
-#endif /* LONGITUDINAL_CONTROL */
+
+#endif /* JETSON_COMMS */

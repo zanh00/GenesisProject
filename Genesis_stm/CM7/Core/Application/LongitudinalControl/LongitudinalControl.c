@@ -41,7 +41,6 @@
 // Defines 
 //////////////////////////////////////////////////////////////////////////////
 
-#define LONGITUDINAL_CONTROL_PERIOD_MS  50
 #define WAIT_MODE_EVENT                 pdMS_TO_TICKS(200)
 #define MANUAL_COMMAND_TIMEOUT_TICKS    pdMS_TO_TICKS(200)
 
@@ -55,9 +54,6 @@
 #define STOP_VEHICLE_ACCELERATION       128
 #define MANUAL_CONTROL_ACCELERATION     180
 #define MANUAL_CONTROL_SPEED            30
-
-#define EVENT_MANUAL_DRIVE              (1 << 2)
-#define EVENT_LANE_KEEP_MODE            (1 << 3)
 
 #define PID_KP                          1
 #define PID_KI                          0.1
@@ -156,11 +152,11 @@ void LongitudinalControl_Task(void* pvParameters)
 
     while(1)
     {
-        events = xEventGroupWaitBits(e_commandFlags, EVENT_MANUAL_DRIVE | EVENT_LANE_KEEP_MODE, pdFALSE, pdFALSE, WAIT_MODE_EVENT);
+        events = xEventGroupWaitBits(e_commandFlags, COMMAND_MANUAL_DRIVE | COMMAND_LANE_KEEP_MODE, pdFALSE, pdFALSE, WAIT_MODE_EVENT);
 
         LongitudinalControl_ReadData();
 
-        if( (events & EVENT_MANUAL_DRIVE) != 0 )
+        if( (events & COMMAND_MANUAL_DRIVE) != 0 )
         {
             if( pidMode != MANUAL )
             {
@@ -169,7 +165,7 @@ void LongitudinalControl_Task(void* pvParameters)
             }
             LongitudinalControl_ManualControl();
         }
-        else if( (events & EVENT_LANE_KEEP_MODE) != 0 )
+        else if( (events & COMMAND_LANE_KEEP_MODE) != 0 )
         {
             if( pidMode != AUTOMATIC )
             {
@@ -178,7 +174,7 @@ void LongitudinalControl_Task(void* pvParameters)
             }
             LongitudinalControl_AutomaticMode();
         }
-        else if(gLongitudinalControl.speed != 0)
+        else if( gLongitudinalControl.speed != 0 )
         { 
             LongitudinalControl_StopTheVehicle();   
         }

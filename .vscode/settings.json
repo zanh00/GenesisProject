@@ -16,6 +16,10 @@
         "usart.h": "c",
         "speedestimation.h": "c",
         "semphr.h": "c",
-        "longitudinalcontrol.h": "c"
-    }
+        "longitudinalcontrol.h": "c",
+        "adaptive_mpc_curvature_model_deployable.h": "c",
+        "math.h": "c",
+        "corecrt_math.h": "c"
+    },
+    "cortex-debug.variableUseNaturalFormat": false
 }
