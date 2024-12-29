@@ -14,11 +14,10 @@
 
 const char* ssid = "WI-FIzgoraj_2G";
 const char* password = "lovrenchertis";
-const char* mqtt_server = "test.mosquitto.org";
+//const char* mqtt_server = "test.mosquitto.org";
+const char* mqtt_server = "192.168.1.237"; // PC IP address running local broker
 const int mqtt_port = 1883;
 
-const char* mqtt_user = "zanhertis@gmail.com";
-const char* mqtt_password = "Cokolada123";
 bool conctd = true;
 
 char stmMessage[10] = "000000000";
