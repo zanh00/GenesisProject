@@ -102,7 +102,7 @@ static void JetsonComms_OnMessageReceived(void)
 
     if( Seriazlizer_Deserialize(gJetsonComms.rxBuffer, &(rxMessage.Id), &(rxMessage.Data.U32)) )
     {
-        HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
+        HAL_GPIO_TogglePin(G_LED_GPIO_Port, G_LED_Pin);
         switch( rxMessage.Id )
         {
             case ID_CURVATURE:

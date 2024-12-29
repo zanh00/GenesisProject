@@ -112,7 +112,7 @@ void publish_message(const char* message)
 {  
   if (client.publish("zr", message))
   {
-    debugPrint("Msg sent");
+    //debugPrint("Msg sent");
   } else 
   {
     debugPrint("Error sending message");
@@ -153,6 +153,7 @@ void loop()
     //debugPrint();
     //debugPrint(stmMessage);
     publish_message(stmMessage);
+    debugPrint(stmMessage);
     stmRxComplete = false;
   }
 

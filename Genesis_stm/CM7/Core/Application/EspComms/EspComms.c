@@ -102,11 +102,14 @@ void EspComms_ReceiverTask(void* pvParameters)
         {
             xEventGroupSetBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMEOUT);
             delayUntilTimeout_ticks = portMAX_DELAY;
+            HAL_GPIO_WritePin(Y_LED_GPIO_Port, Y_LED_Pin, GPIO_PIN_SET);
         }
         else
         {
             // clear the comms timeout flag
             xEventGroupClearBits(e_statusFlags, SF_ESP_COMMUNICTAION_TIMEOUT);
+            HAL_GPIO_WritePin(Y_LED_GPIO_Port, Y_LED_Pin, GPIO_PIN_RESET);
+
         }
     }
 }
@@ -132,7 +135,7 @@ void EspComms_TransmitterTask(void* pveParameters)
             // if message was sent of to uart we add some delay in order not to overload esp since it is generaly a much slower device
             if( messageSent )
             {
-                vTaskDelay(pdMS_TO_TICKS(5));
+                vTaskDelay(pdMS_TO_TICKS(20));
             }
         }
     }
@@ -206,7 +209,6 @@ static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
 
         // any valid message received counts as a communications check
         *lastCommsCheck_ticks = xTaskGetTickCount();
-        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 
         //TODO: switch all other possible IDs and send them to appropriate queues 
 

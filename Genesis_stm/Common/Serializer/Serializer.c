@@ -103,11 +103,11 @@ bool Serializer_SerializeUint32(const uint8_t id, const uint32_t data, uint8_t* 
     // Serialize data field 
     for( uint8_t i = 0; i < SERIALIZER_DATA_FIELD_SIZE; i++ )
     { 
-        uint8_t dataByte        = (data >> (8 * i)) & 0xFF;
+        uint8_t dataByte        = (data >> (8 * (SERIALIZER_DATA_FIELD_SIZE - 1 - i))) & 0xFF;
         Serializer_ByteToAscii(dataByte, &lsbAscii, &msbAscii);
 
-        serializedData[index++] = lsbAscii;
         serializedData[index++] = msbAscii;
+        serializedData[index++] = lsbAscii;
     }
 
     return true;
@@ -135,7 +135,7 @@ bool Serializer_SerializeFloat(const uint8_t id, const float data, uint8_t* cons
     // Serialize data field (float as uint32_t)
     for (uint8_t i = 0; i < 4; i++) // 4 bytes for float
     {
-        uint8_t dataByte = (floatAsUint >> (8 * i)) & 0xFF;
+        uint8_t dataByte = (floatAsUint >> (8 * (SERIALIZER_DATA_FIELD_SIZE - 1 - i))) & 0xFF;
         Serializer_ByteToAscii(dataByte, &lsbAscii, &msbAscii);
 
         serializedData[index++] = msbAscii;

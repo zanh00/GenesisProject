@@ -148,7 +148,13 @@ void Main_Task(void* pvParameters)
 
         if( result == pdPASS )
         {
-            commandFlags = xEventGroupSetBits(e_commandFlags, commandFlags);
+            // xEventGroupSetBits will only set bits but will not clear any. To clear
+            // bits we need to invert the command flag and call clearbits funciton.
+            (void)xEventGroupSetBits(e_commandFlags, commandFlags);
+            // The 8 MSB bits are used by the kernel and must not be cleared
+            commandFlags = (~commandFlags) & 0x00FFFFFF;
+            (void)xEventGroupClearBits(e_commandFlags, commandFlags);
+            
         }
 
         // Sets the delay time which is equal to taskPeriod - task execution time
