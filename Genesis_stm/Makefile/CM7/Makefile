@@ -73,8 +73,9 @@ C_SOURCES =  \
 ../../CM7/Core/Application/LongitudinalControl/LongitudinalControl.c \
 ../../CM7/Core/Application/LongitudinalControl/PID_Controller/pid_controller.c \
 ../../CM7/Core/Application/LateralControl/LateralControl.c \
-../../CM7/Core/Application/LateralControl/MPCmodel/adaptive_mpc_curvature_model_deployable.c \
-../../CM7/Core/Application/LateralControl/MPCmodel/adaptive_mpc_curvature_model_deployable_data.c \
+../../CM7/Core/Application/LateralControl/lateralVehicleController/SimulationModel/Code/LateralController_data.c \
+../../CM7/Core/Application/LateralControl/lateralVehicleController/SimulationModel/Code/LateralController.c \
+../../CM7/Core/Application/LateralControl/lateralVehicleController/SimulationModel/Code/LateralController_capi.c \
 ../../Common/ClockHandling/ClockHandling.c \
 ../../Common/Serializer/Serializer.c \
 ../../CM7/Core/Src/dma.c \
@@ -154,7 +155,7 @@ C_INCLUDES =  \
 -I../../CM7/Core/Application/LongitudinalControl \
 -I../../CM7/Core/Application/LongitudinalControl/PID_Controller \
 -I../../CM7/Core/Application/LateralControl \
--I../../CM7/Core/Application/LateralControl/MPCmodel \
+-I../../CM7/Core/Application/LateralControl/lateralVehicleController/SimulationModel/Code \
 -I../../Drivers/STM32H7xx_HAL_Driver/Inc \
 -I../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy \
 -I../../Drivers/CMSIS/Device/ST/STM32H7xx/Include \

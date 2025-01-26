@@ -16,7 +16,7 @@
 #include "AppMainCM7.h"
 #include "ClockHandling.h"
 #include "LateralControl.h"
-#include "MPCmodel/adaptive_mpc_curvature_model_deployable.h"
+#include "LateralController.h"
 #include "ProjectConfig.h"
 #include <math.h>
 
@@ -91,11 +91,12 @@ void LateralControl_Task(void* pvParameter)
     TIM2->CCR1 = (CCRmax + CCRmin) / 2;
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 
-    rtU.lateral_deviation   = 0;
-    rtU.relative_yaw_angle  = 0;
-    rtU.Velocity            = 0;
+    rtU.lateral_deviation       = 0;
+    rtU.relative_yaw_angle      = 0;
+    rtU.curvature               = 0;
+    rtU.longitudinalvelocity    = 0;
 
-    adaptive_mpc_curvature_model_deployable_initialize();
+    LateralController_initialize();
 
     lastWakeTime = xTaskGetTickCount();
 
@@ -151,13 +152,14 @@ void LateralControl_Task(void* pvParameter)
 //////////////////////////////////////////////////////////////////////////////
 static void LateralControl_Step(LateralControlData_t* const data)
 {
-    rtU.lateral_deviation   = data->Input.lateralDeviation;
-    rtU.relative_yaw_angle  = data->Input.curvature; //TODO: Model needs to be changed
-    rtU.Velocity            = data->Input.velocity;
+    rtU.lateral_deviation       = data->Input.lateralDeviation;
+    rtU.relative_yaw_angle      = 0;                            // TODO: Implement relative yaw angle
+    rtU.curvature               = data->Input.curvature;
+    rtU.longitudinalvelocity    = data->Input.velocity;
 
-    adaptive_mpc_curvature_model_deployable_step();
+    LateralController_step();
 
-    data->Output.angle = rtY.Steeringangle;
+    data->Output.angle = rtY.steering_angle;
 }
 
 static void LateralControl_SetSteerAngle(const uint32_t angleCCR)

@@ -19,7 +19,8 @@
         "longitudinalcontrol.h": "c",
         "adaptive_mpc_curvature_model_deployable.h": "c",
         "math.h": "c",
-        "corecrt_math.h": "c"
+        "corecrt_math.h": "c",
+        "lateralcontroller.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false
 }

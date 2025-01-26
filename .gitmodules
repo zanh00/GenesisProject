@@ -1,0 +1,4 @@
+[submodule "Genesis_stm/CM7/Core/Application/LateralControl/lateralVehicleController"]
+	path = Genesis_stm/CM7/Core/Application/LateralControl/lateralVehicleController
+	url = ../lateralVehicleController.git
+	branch = main
