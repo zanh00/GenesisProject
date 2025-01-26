@@ -201,6 +201,10 @@ static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
             }
             break;
         
+        case ID_LATERAL_CONTROL_MANUAL_STEER_ANGLE:
+            xQueueOverwrite(q_ManualSteerAngle, &receivedMessage.Data.U32);
+            break;
+        
         default:
             //TODO: set unkonw ID Flag
             return; // unrecognised ID -> exit the function

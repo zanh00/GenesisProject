@@ -56,6 +56,7 @@ extern QueueHandle_t q_Curvature;
 extern QueueHandle_t q_LateralDeviation;
 extern QueueHandle_t q_LongitudinalTaskData;
 extern QueueHandle_t q_speed;
+extern QueueHandle_t q_ManualSteerAngle;
 
 extern EventGroupHandle_t  e_commandFlags;
 extern EventGroupHandle_t  e_statusFlags;

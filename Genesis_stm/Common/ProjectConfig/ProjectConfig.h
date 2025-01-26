@@ -47,7 +47,8 @@
 #define ID_STATUS_FLAG                                  5
 #define ID_LONGITUDINAL_AUTOMODE_DIRECTION_SELECTION    6
 #define ID_LONGITUDINAL_SET_ACCELERATION                7
-#define ID_LONGITUDINAL_MANUAL_CONTROL                  8  
+#define ID_LONGITUDINAL_MANUAL_CONTROL                  8
+#define ID_LATERAL_CONTROL_MANUAL_STEER_ANGLE           9  
 #define ID_VEHICLE_SPEED                                130
 
 //////////////////////////////////////////////////////////////////////////////
