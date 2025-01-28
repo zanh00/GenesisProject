@@ -49,6 +49,7 @@
 #define ID_LONGITUDINAL_SET_ACCELERATION                7
 #define ID_LONGITUDINAL_MANUAL_CONTROL                  8
 #define ID_LATERAL_CONTROL_MANUAL_STEER_ANGLE           9  
+#define ID_LATERAL_CONTROL_STEER_ANGLE                  10  
 #define ID_VEHICLE_SPEED                                130
 
 //////////////////////////////////////////////////////////////////////////////
@@ -77,6 +78,7 @@
 #define COMMAND_LANE_KEEP_MODE                  (1 << 3)
 #define COMMAND_ENABLE_CURVATURE_DIAG           (1 << 4)
 #define COMMAND_ENABLE_LATERAL_DEVIATION_DIAG   (1 << 5)
+#define COMMAND_ENABLE_STEER_ANGLE_DIAG         (1 << 6)
 
 
 

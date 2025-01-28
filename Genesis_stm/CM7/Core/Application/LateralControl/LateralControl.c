@@ -34,6 +34,12 @@
 #define STEERING_ANGLE_MAX_DUTY_CYCLE   (((MAX_STEER_ANGLE_RAD / (PI/2.0)) * (10.0 - 5.0)) + 7.5)
 #define STEERING_ANGLE_MIN_DUTY_CYCLE   (((-MAX_STEER_ANGLE_RAD / (PI/2.0)) * (10.0 - 5.0)) + 7.5)
 
+typedef enum
+{
+    eMODE_MANUAL = 0,
+    eMODE_LANE_KEEP
+} LateralControlMode_e;
+
 typedef struct LateralControlData
 {
     struct
@@ -44,10 +50,11 @@ typedef struct LateralControlData
     } Input;
     struct 
     {
-        double angle;
+        float angle;
     } Output;
 
-    float ManualSteerAngle;
+    float                   manualSteerAngle;
+    LateralControlMode_e    mode;
     
 } LateralControlData_t;
 
@@ -55,7 +62,7 @@ typedef struct LateralControlData
 // Global Variables 
 //////////////////////////////////////////////////////////////////////////////
 
-LateralControlData_t gData = {{0}, {0}, 0};
+LateralControlData_t gData = {{0}, {0}, 0, 0};
 
 //////////////////////////////////////////////////////////////////////////////
 // Function prototypes 
@@ -120,11 +127,13 @@ void LateralControl_Task(void* pvParameter)
 
         if( (commandFlags & COMMAND_MANUAL_DRIVE) != 0 )
         {
-            steerCCR = LateralControl_AngleToCCR(gData.ManualSteerAngle, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD, CCRmin, CCRmax);
+            gData.mode = eMODE_MANUAL;
+            steerCCR = LateralControl_AngleToCCR(gData.manualSteerAngle, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD, CCRmin, CCRmax);
             LateralControl_SetSteerAngle(steerCCR);
         }
         else if( (commandFlags & COMMAND_LANE_KEEP_MODE) != 0 )
         {
+            gData.mode = eMODE_LANE_KEEP;
             LateralControl_Step(&gData);
 
             // The value should already be constrained in the model...but just in case
@@ -197,13 +206,41 @@ static void LateralControl_ReadData(LateralControlData_t* const data)
     xQueuePeek(q_ManualSteerAngle, &manualSteerAngleTemp, 0);
     // steering angle is shifted by 30 degrees to avoid having to use int32 values in the messages
     // manualSteerAngleTemp: 0-> -30°; 60 -> 30°
-    gData.ManualSteerAngle = LateralControl_DegToRad(manualSteerAngleTemp - 30);
+    gData.manualSteerAngle = LateralControl_DegToRad(manualSteerAngleTemp - 30);
 
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Function converts degrees to radians.
+ * 
+ * @param[in]       deg     angle in degrees
+ * 
+ * @return          angle in radians
+ */
+//////////////////////////////////////////////////////////////////////////////
 static float LateralControl_DegToRad(const int32_t deg)
 {
     return deg * (PI / 180.0);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Function converts radians to degrees. And shifts the value by 30 degrees to
+ * get the steering angle in the range of 0-60° so that we don't have to use 
+ * int32 values in the messages.
+ * TODO: This is a temporary solution and should be made to work with int32 values
+ * 
+ * @param[in]       rad     angle in radians
+ * 
+ * @return          angle in degrees
+ */
+//////////////////////////////////////////////////////////////////////////////
+static uint32_t LateralControl_RadToDeg(const float rad)
+{
+    const int32_t deg =  rad * (180.0 / PI);
+
+    return deg + 30;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -219,17 +256,33 @@ static void LateralControl_SendDiagnostic(TimerHandle_t xTimer)
     EventBits_t flags = xEventGroupGetBits(e_commandFlags);
     Message_t   diagData;
 
-    if( (flags & COMMAND_ENABLE_CURVATURE_DIAG) != 0)
+    if( (flags & COMMAND_ENABLE_CURVATURE_DIAG) != 0 )
     {
         diagData.Id = ID_CURVATURE;
         diagData.Data.F = gData.Input.curvature;
         xQueueSendToBack(q_DiagnosticData, &diagData, 0);
     }
 
-    if( (flags & COMMAND_ENABLE_LATERAL_DEVIATION_DIAG) != 0)
+    if( (flags & COMMAND_ENABLE_LATERAL_DEVIATION_DIAG) != 0 )
     {
         diagData.Id = ID_LATERAL_DEVIATION;
         diagData.Data.F = gData.Input.lateralDeviation;
+        xQueueSendToBack(q_DiagnosticData, &diagData, 0);
+    }
+
+    if( (flags & COMMAND_ENABLE_STEER_ANGLE_DIAG) != 0 )
+    {
+        diagData.Id = ID_LATERAL_CONTROL_STEER_ANGLE;
+
+        if( gData.mode == eMODE_LANE_KEEP )
+        {
+            diagData.Data.U32 = LateralControl_RadToDeg(gData.Output.angle);
+        }
+        else if ( gData.mode == eMODE_MANUAL )
+        {
+            diagData.Data.U32 = LateralControl_RadToDeg(gData.manualSteerAngle);
+        }
+
         xQueueSendToBack(q_DiagnosticData, &diagData, 0);
     }
 }
