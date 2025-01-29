@@ -204,6 +204,7 @@ static void LateralControl_ReadData(LateralControlData_t* const data)
     xQueuePeek(q_Curvature, &(data->Input.curvature), 0);
     xQueuePeek(q_LateralDeviation, &(data->Input.lateralDeviation), 0);
     xQueuePeek(q_ManualSteerAngle, &manualSteerAngleTemp, 0);
+    xQueuePeek(q_speed, &(data->Input.velocity), 0);
     // steering angle is shifted by 30 degrees to avoid having to use int32 values in the messages
     // manualSteerAngleTemp: 0-> -30°; 60 -> 30°
     gData.manualSteerAngle = LateralControl_DegToRad(manualSteerAngleTemp - 30);
