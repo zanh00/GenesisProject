@@ -24,15 +24,15 @@
 // Defines 
 //////////////////////////////////////////////////////////////////////////////
 
-#define MAX_STEER_ANGLE_RAD             (MAX_STEER_ANGLE_DEG * (PI / 180.0))
+#define MAX_STEER_ANGLE_RAD             (MAX_STEER_ANGLE_DEG * (PI / 180.0f))
 
 /*
     Max servo angle: 90° -> 10% and 5% duty cycle (either direction).
     Position 0° -> 7,5% duty cycle. The below two calculations represent
     max and min duty cycles coresponding to maxmimum allowed steering angle
 */
-#define STEERING_ANGLE_MAX_DUTY_CYCLE   (((MAX_STEER_ANGLE_RAD / (PI/2.0)) * (10.0 - 5.0)) + 7.5)
-#define STEERING_ANGLE_MIN_DUTY_CYCLE   (((-MAX_STEER_ANGLE_RAD / (PI/2.0)) * (10.0 - 5.0)) + 7.5)
+#define STEERING_ANGLE_MAX_DUTY_CYCLE   (((MAX_STEER_ANGLE_RAD / (PI/2.0f)) * (10.0f - 7.5f)) + 7.5f)
+#define STEERING_ANGLE_MIN_DUTY_CYCLE   (7.5f - ((MAX_STEER_ANGLE_RAD / (PI/2.0f)) * (7.5f - 5.0f)))
 
 typedef enum
 {
@@ -73,7 +73,7 @@ static void     LateralControl_ReadData         (LateralControlData_t* const dat
 static float    LateralControl_DegToRad         (const int32_t deg);
 static void     LateralControl_SendDiagnostic   (TimerHandle_t xTimer);
 static void     LateralControl_SetSteerAngle    (const uint32_t angleCCR);
-static void     Steering_PWMInit                (const uint32_t intTimClk, const uint32_t sysclk, const uint8_t Dmin, const uint8_t Dmax, uint32_t* const CCRmin, uint32_t* const CCRmax);
+static void     Steering_PWMInit                (const uint32_t intTimClk, const uint32_t sysclk, const float Dmin, const float Dmax, uint32_t* const CCRmin, uint32_t* const CCRmax);
 static uint32_t LateralControl_AngleToCCR       (const float angle, const float angleMin, const float angleMax, const uint32_t CCRmin, const uint32_t CCRmax);
 static double   Constrain                       (const float value, const float min, const float max);
 
@@ -305,7 +305,7 @@ static void LateralControl_SendDiagnostic(TimerHandle_t xTimer)
  * @return          void
  */
 //////////////////////////////////////////////////////////////////////////////
-static void Steering_PWMInit(const uint32_t intTimClk, const uint32_t sysclk, const uint8_t Dmin, const uint8_t Dmax, uint32_t* const CCRmin, uint32_t* const CCRmax)
+static void Steering_PWMInit(const uint32_t intTimClk, const uint32_t sysclk, const float Dmin, const float Dmax, uint32_t* const CCRmin, uint32_t* const CCRmax)
 {
     uint8_t     presc   = 0u;
     uint8_t     freq    = 50u;  // 50Hz
@@ -324,8 +324,8 @@ static void Steering_PWMInit(const uint32_t intTimClk, const uint32_t sysclk, co
     timClk  = intTimClk / presc;
     ARR     = timClk / freq;
 
-    *CCRmin = (Dmin * ARR) / 100;
-    *CCRmax = (Dmax * ARR) / 100;
+    *CCRmin = (uint32_t)((Dmin * ARR) / 100);
+    *CCRmax = (uint32_t)((Dmax * ARR) / 100);
 
     htim2.Init.Prescaler    = presc - 1;
     htim2.Init.Period       = ARR;
