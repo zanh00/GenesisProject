@@ -21,6 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 void LateralControl_Task(void* pvParameter);
+void testMain_lateral(void); // test function
 
 
 #endif /* LATERAL_CONTORL */

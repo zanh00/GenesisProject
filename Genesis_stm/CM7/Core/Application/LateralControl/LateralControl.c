@@ -81,6 +81,28 @@ static double   Constrain                       (const float value, const float 
 // FreeRTOS Task
 //////////////////////////////////////////////////////////////////////////////
 
+void testMain_lateral(void)
+{
+    EventBits_t             commandFlags;
+    TickType_t              lastWakeTime;
+    uint32_t                CCRmin          = 0; 
+    uint32_t                CCRmax          = 0;
+    const uint32_t          timer2Clk       = ClockHandling_GetTimerClkFreq(&htim2);
+    const uint32_t          sysClk          = HAL_RCC_GetSysClockFreq();
+    const TickType_t        taskPeriod      = pdMS_TO_TICKS(LATERAL_CONTROL_PERIOD_MS);
+  
+
+    Steering_PWMInit(timer2Clk, sysClk, STEERING_ANGLE_MIN_DUTY_CYCLE, STEERING_ANGLE_MAX_DUTY_CYCLE, &CCRmin, &CCRmax);
+
+    uint8_t steerCCR;
+    while(1)
+    {
+        steerCCR = LateralControl_AngleToCCR(0.01, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD, CCRmin, CCRmax);
+        LateralControl_SetSteerAngle(steerCCR);
+        HAL_Delay(2000);
+    }
+}
+
 void LateralControl_Task(void* pvParameter)
 {
     EventBits_t             commandFlags;

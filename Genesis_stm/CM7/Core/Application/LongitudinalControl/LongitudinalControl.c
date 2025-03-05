@@ -118,6 +118,16 @@ static void         LongitudinalControl_AutomaticMode           (void);
 // FreeRTOS Task
 //////////////////////////////////////////////////////////////////////////////
 
+void testMain_long(void)
+{
+    while(1)
+    {
+        LongitudinalControl_CheckDriverConnection();
+        HAL_Delay(1000);
+    }
+
+}
+
 void LongitudinalControl_Task(void* pvParameters)
 {
     EventBits_t     events;

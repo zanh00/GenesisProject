@@ -177,12 +177,15 @@ void Main_Task(void* pvParameters)
 //////////////////////////////////////////////////////////////////////////////
 void AppCM7_Main()
 {
-    if( (xTaskCreate(Main_Task, "Main task", 1024, NULL, 3, NULL)) != pdPASS )
-    {
-        Error_Handler();
-    }
+    // if( (xTaskCreate(Main_Task, "Main task", 1024, NULL, 3, NULL)) != pdPASS )
+    // {
+    //     Error_Handler();
+    // }
 
-    vTaskStartScheduler();
+    // vTaskStartScheduler();
+
+    testMain_long();
+    testMain_lateral();
 
     while(1)
     {

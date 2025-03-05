@@ -37,6 +37,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 void LongitudinalControl_Task(void* pvParameters);
+void testMain_long(void); // test function
 
 
 #endif /* LONGITUDINAL_CONTROL */
