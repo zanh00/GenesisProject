@@ -93,11 +93,21 @@ void testMain_lateral(void)
   
 
     Steering_PWMInit(timer2Clk, sysClk, STEERING_ANGLE_MIN_DUTY_CYCLE, STEERING_ANGLE_MAX_DUTY_CYCLE, &CCRmin, &CCRmax);
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 
-    uint8_t steerCCR;
+    uint32_t steerCCR;
     while(1)
     {
         steerCCR = LateralControl_AngleToCCR(0.01, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD, CCRmin, CCRmax);
+        LateralControl_SetSteerAngle(steerCCR);
+        HAL_Delay(2000);
+        steerCCR = LateralControl_AngleToCCR(0.17, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD, CCRmin, CCRmax);
+        LateralControl_SetSteerAngle(steerCCR);
+        HAL_Delay(2000);
+        steerCCR = LateralControl_AngleToCCR(0.35, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD, CCRmin, CCRmax);
+        LateralControl_SetSteerAngle(steerCCR);
+        HAL_Delay(2000);
+        steerCCR = LateralControl_AngleToCCR(0.17, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD, CCRmin, CCRmax);
         LateralControl_SetSteerAngle(steerCCR);
         HAL_Delay(2000);
     }

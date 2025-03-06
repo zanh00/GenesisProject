@@ -661,9 +661,9 @@
 
 #define configPRIO_BITS                         4
 
-#define xPortPendSVHandler 			PendSV_Handler
-#define vPortSVCHandler 			SVC_Handler
-#define xPortSysTickHandler 		SysTick_Handler
+// #define xPortPendSVHandler 			PendSV_Handler
+// #define vPortSVCHandler 			SVC_Handler
+// #define xPortSysTickHandler 		SysTick_Handler
 
 
 #endif /* FREERTOS_CONFIG_H */

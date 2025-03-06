@@ -184,7 +184,7 @@ void AppCM7_Main()
 
     // vTaskStartScheduler();
 
-    testMain_long();
+    //testMain_long();
     testMain_lateral();
 
     while(1)
