@@ -6,7 +6,7 @@
         {
             "label": "Build",
             "type": "shell",
-            "command": "mingw32-make -j12", // The make command you want to run
+            "command": "make -j12", // The make command you want to run
             "group": {
                 "kind": "build",
                 "isDefault": true

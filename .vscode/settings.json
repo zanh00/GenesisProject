@@ -20,7 +20,8 @@
         "adaptive_mpc_curvature_model_deployable.h": "c",
         "math.h": "c",
         "corecrt_math.h": "c",
-        "lateralcontroller.h": "c"
+        "lateralcontroller.h": "c",
+        "espcomms.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false
 }
