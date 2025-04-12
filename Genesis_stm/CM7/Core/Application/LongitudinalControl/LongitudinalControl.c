@@ -138,10 +138,16 @@ void LongitudinalControl_Task(void* pvParameters)
     // the semaphore is given back by the interrupt routine when tx finishes.
     xSemaphoreGive(txSemphr);
 
+#if (MOTOR_DRIVER_USE_I2C == 1)
     while( LongitudinalControl_CheckDriverConnection() == false )
     {
         vTaskDelay(pdMS_TO_TICKS(50));
     }
+#else
+    HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_8B_R, 0);
+    HAL_GPIO_WritePin(DIRECTION_SELECT_GPIO_Port, DIRECTION_SELECT_Pin, GPIO_PIN_SET); // 1 -> forward; 0 -> backward
+#endif
 
     PIDInit(&gPid, PID_KP, PID_KI, PID_KD, PID_SAMPLE_TIME, PID_MIN_SPEED_VALUE, PID_MAX_SPEED_VALUE, pidMode, pidDirection);
 
@@ -218,21 +224,35 @@ static bool LongitudinalControl_CheckDriverConnection(void)
 
 static void LongitudinalControl_StopTheVehicle(void)
 {
+#if (MOTOR_DRIVER_USE_I2C == 1)
     LongitudinalControl_WriteToDriver(DRIVER_ACCELERATION_REGISTER, STOP_VEHICLE_ACCELERATION);
     LongitudinalControl_WriteToDriver(DRIVER_SPEED_REGISTER, 0);
     LongitudinalControl_WriteToDriver(DRIVER_COMMAND_REGISTER, 1); // 1 -> forward
+#else
+    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_8B_R, 0);
+#endif
 }
 
 static void LongitudinalControl_MoveForward(const uint8_t desiredSpeed)
 {
+#if (MOTOR_DRIVER_USE_I2C == 1)
     LongitudinalControl_WriteToDriver(DRIVER_SPEED_REGISTER, desiredSpeed);
     LongitudinalControl_WriteToDriver(DRIVER_COMMAND_REGISTER, 1); // 1 -> forward
+#else
+    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_8B_R, desiredSpeed);
+    HAL_GPIO_WritePin(DIRECTION_SELECT_GPIO_Port, DIRECTION_SELECT_Pin, GPIO_PIN_SET); // 1 -> forward; 0 -> backward
+#endif
 }
 
 static void LongitudinalControl_MoveBackward(void)
 {
+#if (MOTOR_DRIVER_USE_I2C == 1)
     LongitudinalControl_WriteToDriver(DRIVER_SPEED_REGISTER, MANUAL_CONTROL_SPEED);
     LongitudinalControl_WriteToDriver(DRIVER_COMMAND_REGISTER, 2); // 1 -> revese
+#else
+    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_8B_R, MANUAL_CONTROL_SPEED);
+    HAL_GPIO_WritePin(DIRECTION_SELECT_GPIO_Port, DIRECTION_SELECT_Pin, GPIO_PIN_RESET); // 1 -> forward; 0 -> backward
+#endif
 }
 
 static void LongitudinalControl_ReadData(void)

@@ -36,6 +36,9 @@
 //Maximum wheel steer angle in either direction [deg]
 #define MAX_STEER_ANGLE_DEG             30
 
+// Wheateher to use the motor driver over I2C or analog control
+#define MOTOR_DRIVER_USE_I2C            0
+
 //////////////////////////////////////////////////////////////////////////////
 // ESP <-> STM Message Library
 //////////////////////////////////////////////////////////////////////////////

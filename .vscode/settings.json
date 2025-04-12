@@ -21,7 +21,8 @@
         "math.h": "c",
         "corecrt_math.h": "c",
         "lateralcontroller.h": "c",
-        "espcomms.h": "c"
+        "espcomms.h": "c",
+        "dac.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false
 }
