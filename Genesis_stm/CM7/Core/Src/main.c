@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dac.h"
 #include "dma.h"
 #include "i2c.h"
 #include "tim.h"
@@ -136,6 +137,7 @@ HSEM notification */
   MX_TIM5_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
+  MX_DAC1_Init();
   /* USER CODE BEGIN 2 */
 
   // Set NVIC priority grouping for FreeRTOS compatibility
