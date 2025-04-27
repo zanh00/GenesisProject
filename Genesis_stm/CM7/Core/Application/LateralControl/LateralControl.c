@@ -103,7 +103,7 @@ void LateralControl_Task(void* pvParameter)
     rtU.lateral_deviation       = 0;
     rtU.relative_yaw_angle      = 0;
     rtU.curvature               = 0;
-    rtU.longitudinalvelocity    = 0;
+    rtU.velocity_sim            = 0;
 
     LateralController_initialize();
 
@@ -167,7 +167,7 @@ static void LateralControl_Step(LateralControlData_t* const data)
     rtU.lateral_deviation       = data->Input.lateralDeviation;
     rtU.relative_yaw_angle      = 0;                            // TODO: Implement relative yaw angle
     rtU.curvature               = data->Input.curvature;
-    rtU.longitudinalvelocity    = data->Input.velocity;
+    rtU.velocity_sim            = data->Input.velocity;
 
     LateralController_step();
 

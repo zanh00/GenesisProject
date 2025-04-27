@@ -18,7 +18,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #define LONGITUDINAL_CONTROL_PERIOD_MS          50
-#define LATERAL_CONTROL_PERIOD_MS               50
+#define LATERAL_CONTROL_PERIOD_MS               20
 #define SPEEDESTIMATION_PERIOD_MS               50
 
 // Period in which vehicle speed measurement will be sent out to diagnostic queue

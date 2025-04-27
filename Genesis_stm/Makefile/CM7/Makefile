@@ -75,7 +75,6 @@ C_SOURCES =  \
 ../../CM7/Core/Application/LateralControl/LateralControl.c \
 ../../CM7/Core/Application/LateralControl/lateralVehicleController/SimulationModel/Code/LateralController_data.c \
 ../../CM7/Core/Application/LateralControl/lateralVehicleController/SimulationModel/Code/LateralController.c \
-../../CM7/Core/Application/LateralControl/lateralVehicleController/SimulationModel/Code/LateralController_capi.c \
 ../../Common/ClockHandling/ClockHandling.c \
 ../../Common/Serializer/Serializer.c \
 ../../CM7/Core/Src/dma.c \
