@@ -43,6 +43,7 @@ QueueHandle_t       q_LongitudinalTaskData  = NULL;
 QueueHandle_t       q_Curvature             = NULL;
 QueueHandle_t       q_LateralDeviation      = NULL;
 QueueHandle_t       q_speed                 = NULL;
+QueueHandle_t       q_ManualSteerAngle      = NULL;
 
 EventGroupHandle_t  e_commandFlags          = NULL;
 EventGroupHandle_t  e_statusFlags           = NULL;
@@ -65,13 +66,10 @@ static  void SendStatusUpdateCallback       (TimerHandle_t xTimer);
  * via event flags. Since one event group can hold 24 flags in our example, this should be enough
  * for all tasks to notify the main task about there status with the same event group.
  * Main task will set the command flags (again, same for all tasks), execution tasks will poll the
- * parts of the event group intended for that task and update their status flag. Main task will than
- * be able to see if the staus flags match with the requested command and be able to determine any errors.
+ * parts of the event group intended for that task.
  * The command flags will include if particular task will have to report any diagnostic data. If yes, than
- * all the tasks will put the data in the same queue (Message structure with ID) and the main task will be
- * sending those messages one by one to the esp comms task. The queu will be of a fixed size and if a task will
- * not be able to write to the queue do to it being full, it will set the overload flag, that will notify
- * the user that data is being lost. 
+ * all the tasks will put the data in the same queue (Message structure with ID) that will be directly read
+ * and sent out by the esp transmitter task.
  * 
  */
 
@@ -93,6 +91,7 @@ void Main_Task(void* pvParameters)
     q_Curvature             = xQueueCreate(1, sizeof(float));
     q_LateralDeviation      = xQueueCreate(1, sizeof(float));
     q_speed                 = xQueueCreate(1, sizeof(uint32_t));
+    q_ManualSteerAngle      = xQueueCreate(1, sizeof(uint32_t));
 
     t_statusTimer = xTimerCreate("Status timer", SEND_STATUS_FLAG_PERIOD, pdTRUE, NULL, SendStatusUpdateCallback);
 
@@ -166,6 +165,16 @@ void Main_Task(void* pvParameters)
 // Function Definitions 
 //////////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Application starting point. Function is called from main fucntion generated
+ * by cubeMX in Src/main.c. 
+ * Function creates main task and starts the scheduler.
+ * 
+ * @return  void
+ * 
+ */
+//////////////////////////////////////////////////////////////////////////////
 void AppCM7_Main()
 {
     if( (xTaskCreate(Main_Task, "Main task", 1024, NULL, 3, NULL)) != pdPASS )
@@ -181,6 +190,17 @@ void AppCM7_Main()
     }
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * This is a freeRTOS software timer callback function that periodically sends
+ * status update to the esp device.
+ * 
+ * @param[in]   xTimer  Timer handle
+ * 
+ * @return      void
+ * 
+ */
+//////////////////////////////////////////////////////////////////////////////
 static void SendStatusUpdateCallback(TimerHandle_t xTimer)
 {
     Message_t   messageToSend;

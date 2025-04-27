@@ -135,7 +135,7 @@ void EspComms_TransmitterTask(void* pveParameters)
             // if message was sent of to uart we add some delay in order not to overload esp since it is generaly a much slower device
             if( messageSent )
             {
-                vTaskDelay(pdMS_TO_TICKS(20));
+                vTaskDelay(pdMS_TO_TICKS(10));
             }
         }
     }
@@ -195,10 +195,15 @@ static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
         case ID_LONGITUDINAL_AUTOMODE_DIRECTION_SELECTION:
         case ID_LONGITUDINAL_SET_ACCELERATION:
         case ID_LONGITUDINAL_MANUAL_CONTROL:
+        case ID_LONGITUDINAL_REQUESTED_SPEED:
             if( xQueueSendToBack(q_LongitudinalTaskData, &receivedMessage, WAIT_FOR_QUEUE_MS) != pdTRUE )
             {
                 //TODO: Longitudinal task overload
             }
+            break;
+        
+        case ID_LATERAL_CONTROL_MANUAL_STEER_ANGLE:
+            xQueueOverwrite(q_ManualSteerAngle, &receivedMessage.Data.U32);
             break;
         
         default:

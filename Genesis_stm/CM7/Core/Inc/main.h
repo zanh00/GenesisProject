@@ -61,6 +61,8 @@ void Error_Handler(void);
 #define G_LED_GPIO_Port GPIOA
 #define R_LED_Pin GPIO_PIN_14
 #define R_LED_GPIO_Port GPIOB
+#define DIRECTION_SELECT_Pin GPIO_PIN_4
+#define DIRECTION_SELECT_GPIO_Port GPIOB
 #define Y_LED_Pin GPIO_PIN_1
 #define Y_LED_GPIO_Port GPIOE
 

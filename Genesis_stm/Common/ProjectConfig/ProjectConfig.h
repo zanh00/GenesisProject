@@ -18,7 +18,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #define LONGITUDINAL_CONTROL_PERIOD_MS          50
-#define LATERAL_CONTROL_PERIOD_MS               50
+#define LATERAL_CONTROL_PERIOD_MS               20
 #define SPEEDESTIMATION_PERIOD_MS               50
 
 // Period in which vehicle speed measurement will be sent out to diagnostic queue
@@ -36,6 +36,9 @@
 //Maximum wheel steer angle in either direction [deg]
 #define MAX_STEER_ANGLE_DEG             30
 
+// Wheateher to use the motor driver over I2C or analog control
+#define MOTOR_DRIVER_USE_I2C            0
+
 //////////////////////////////////////////////////////////////////////////////
 // ESP <-> STM Message Library
 //////////////////////////////////////////////////////////////////////////////
@@ -47,7 +50,9 @@
 #define ID_STATUS_FLAG                                  5
 #define ID_LONGITUDINAL_AUTOMODE_DIRECTION_SELECTION    6
 #define ID_LONGITUDINAL_SET_ACCELERATION                7
-#define ID_LONGITUDINAL_MANUAL_CONTROL                  8  
+#define ID_LONGITUDINAL_MANUAL_CONTROL                  8
+#define ID_LATERAL_CONTROL_MANUAL_STEER_ANGLE           9  
+#define ID_LATERAL_CONTROL_STEER_ANGLE                  10  
 #define ID_VEHICLE_SPEED                                130
 
 //////////////////////////////////////////////////////////////////////////////
@@ -76,6 +81,7 @@
 #define COMMAND_LANE_KEEP_MODE                  (1 << 3)
 #define COMMAND_ENABLE_CURVATURE_DIAG           (1 << 4)
 #define COMMAND_ENABLE_LATERAL_DEVIATION_DIAG   (1 << 5)
+#define COMMAND_ENABLE_STEER_ANGLE_DIAG         (1 << 6)
 
 
 

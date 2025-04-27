@@ -16,7 +16,7 @@
 #include "AppMainCM7.h"
 #include "ClockHandling.h"
 #include "LateralControl.h"
-#include "MPCmodel/adaptive_mpc_curvature_model_deployable.h"
+#include "LateralController.h"
 #include "ProjectConfig.h"
 #include <math.h>
 
@@ -24,15 +24,21 @@
 // Defines 
 //////////////////////////////////////////////////////////////////////////////
 
-#define MAX_STEER_ANGLE_RAD             (MAX_STEER_ANGLE_DEG * (PI / 180.0))
+#define MAX_STEER_ANGLE_RAD             (MAX_STEER_ANGLE_DEG * (PI / 180.0f))
 
 /*
     Max servo angle: 90° -> 10% and 5% duty cycle (either direction).
     Position 0° -> 7,5% duty cycle. The below two calculations represent
     max and min duty cycles coresponding to maxmimum allowed steering angle
 */
-#define STEERING_ANGLE_MAX_DUTY_CYCLE   (((MAX_STEER_ANGLE_RAD / (PI/2.0)) * (10.0 - 5.0)) + 7.5)
-#define STEERING_ANGLE_MIN_DUTY_CYCLE   (((-MAX_STEER_ANGLE_RAD / (PI/2.0)) * (10.0 - 5.0)) + 7.5)
+#define STEERING_ANGLE_MAX_DUTY_CYCLE   (((MAX_STEER_ANGLE_RAD / (PI/2.0f)) * (10.0f - 7.5f)) + 7.5f)
+#define STEERING_ANGLE_MIN_DUTY_CYCLE   (7.5f - ((MAX_STEER_ANGLE_RAD / (PI/2.0f)) * (7.5f - 5.0f)))
+
+typedef enum
+{
+    eMODE_MANUAL = 0,
+    eMODE_LANE_KEEP
+} LateralControlMode_e;
 
 typedef struct LateralControlData
 {
@@ -44,8 +50,11 @@ typedef struct LateralControlData
     } Input;
     struct 
     {
-        double angle;
+        float angle;
     } Output;
+
+    float                   manualSteerAngle;
+    LateralControlMode_e    mode;
     
 } LateralControlData_t;
 
@@ -53,7 +62,7 @@ typedef struct LateralControlData
 // Global Variables 
 //////////////////////////////////////////////////////////////////////////////
 
-LateralControlData_t gData = {{0}, {0}};
+LateralControlData_t gData = {{0}, {0}, 0, 0};
 
 //////////////////////////////////////////////////////////////////////////////
 // Function prototypes 
@@ -61,12 +70,12 @@ LateralControlData_t gData = {{0}, {0}};
 
 static void     LateralControl_Step             (LateralControlData_t* const data);
 static void     LateralControl_ReadData         (LateralControlData_t* const data);
+static float    LateralControl_DegToRad         (const int32_t deg);
 static void     LateralControl_SendDiagnostic   (TimerHandle_t xTimer);
 static void     LateralControl_SetSteerAngle    (const uint32_t angleCCR);
-static void     Steering_PWMInit                (const uint32_t intTimClk, const uint32_t sysclk, const uint8_t Dmin, const uint8_t Dmax, uint32_t* const CCRmin, uint32_t* const CCRmax);
-static uint32_t LateralControl_AngleToCCR       (const double angle, const double angleMin, const double angleMax, const uint32_t CCRmin, const uint32_t CCRmax);
-static double   Constrain                       (const double value, const double min, const double max);
-
+static void     Steering_PWMInit                (const uint32_t intTimClk, const uint32_t sysclk, const float Dmin, const float Dmax, uint32_t* const CCRmin, uint32_t* const CCRmax);
+static uint32_t LateralControl_AngleToCCR       (const float angle, const float angleMin, const float angleMax, const uint32_t CCRmin, const uint32_t CCRmax);
+static double   Constrain                       (const float value, const float min, const float max);
 
 //////////////////////////////////////////////////////////////////////////////
 // FreeRTOS Task
@@ -91,11 +100,12 @@ void LateralControl_Task(void* pvParameter)
     TIM2->CCR1 = (CCRmax + CCRmin) / 2;
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 
-    rtU.lateral_deviation   = 0;
-    rtU.relative_yaw_angle  = 0;
-    rtU.Velocity            = 0;
+    rtU.lateral_deviation       = 0;
+    rtU.relative_yaw_angle      = 0;
+    rtU.curvature               = 0;
+    rtU.velocity_sim            = 0;
 
-    adaptive_mpc_curvature_model_deployable_initialize();
+    LateralController_initialize();
 
     lastWakeTime = xTaskGetTickCount();
 
@@ -117,10 +127,13 @@ void LateralControl_Task(void* pvParameter)
 
         if( (commandFlags & COMMAND_MANUAL_DRIVE) != 0 )
         {
-            // TODO: Implement manual mode
+            gData.mode = eMODE_MANUAL;
+            steerCCR = LateralControl_AngleToCCR(gData.manualSteerAngle, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD, CCRmin, CCRmax);
+            LateralControl_SetSteerAngle(steerCCR);
         }
         else if( (commandFlags & COMMAND_LANE_KEEP_MODE) != 0 )
         {
+            gData.mode = eMODE_LANE_KEEP;
             LateralControl_Step(&gData);
 
             // The value should already be constrained in the model...but just in case
@@ -151,42 +164,126 @@ void LateralControl_Task(void* pvParameter)
 //////////////////////////////////////////////////////////////////////////////
 static void LateralControl_Step(LateralControlData_t* const data)
 {
-    rtU.lateral_deviation   = data->Input.lateralDeviation;
-    rtU.relative_yaw_angle  = data->Input.curvature; //TODO: Model needs to be changed
-    rtU.Velocity            = data->Input.velocity;
+    rtU.lateral_deviation       = data->Input.lateralDeviation;
+    rtU.relative_yaw_angle      = 0;                            // TODO: Implement relative yaw angle
+    rtU.curvature               = data->Input.curvature;
+    rtU.velocity_sim            = data->Input.velocity;
 
-    adaptive_mpc_curvature_model_deployable_step();
+    LateralController_step();
 
-    data->Output.angle = rtY.Steeringangle;
+    data->Output.angle = rtY.steering_angle;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Function sets the steering angle of the vehicle.
+ * 
+ * @param[in]       angleCCR    steering angle in CCR value
+ * 
+ * @return          void
+ */
+//////////////////////////////////////////////////////////////////////////////
 static void LateralControl_SetSteerAngle(const uint32_t angleCCR)
 {
     TIM2->CCR1 = angleCCR;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Function reads the data from the queues.
+ * 
+ * @param[out]      data    Lateral control data structure
+ * 
+ * @return          void
+ */
+//////////////////////////////////////////////////////////////////////////////
 static void LateralControl_ReadData(LateralControlData_t* const data)
 {
+    uint32_t manualSteerAngleTemp = 30;
+
     xQueuePeek(q_Curvature, &(data->Input.curvature), 0);
     xQueuePeek(q_LateralDeviation, &(data->Input.lateralDeviation), 0);
+    xQueuePeek(q_ManualSteerAngle, &manualSteerAngleTemp, 0);
+    xQueuePeek(q_speed, &(data->Input.velocity), 0);
+    // steering angle is shifted by 30 degrees to avoid having to use int32 values in the messages
+    // manualSteerAngleTemp: 0-> -30°; 60 -> 30°
+    gData.manualSteerAngle = LateralControl_DegToRad(manualSteerAngleTemp - 30);
+
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Function converts degrees to radians.
+ * 
+ * @param[in]       deg     angle in degrees
+ * 
+ * @return          angle in radians
+ */
+//////////////////////////////////////////////////////////////////////////////
+static float LateralControl_DegToRad(const int32_t deg)
+{
+    return deg * (PI / 180.0);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Function converts radians to degrees. And shifts the value by 30 degrees to
+ * get the steering angle in the range of 0-60° so that we don't have to use 
+ * int32 values in the messages.
+ * TODO: This is a temporary solution and should be made to work with int32 values
+ * 
+ * @param[in]       rad     angle in radians
+ * 
+ * @return          angle in degrees
+ */
+//////////////////////////////////////////////////////////////////////////////
+static uint32_t LateralControl_RadToDeg(const float rad)
+{
+    const int32_t deg =  rad * (180.0 / PI);
+
+    return deg + 30;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Function sends out diagnostic data specified by the command flags.
+ * 
+ * @param[in]       xTimer      Timer handle
+ * return           void
+ */
+//////////////////////////////////////////////////////////////////////////////
 static void LateralControl_SendDiagnostic(TimerHandle_t xTimer)
 {
     EventBits_t flags = xEventGroupGetBits(e_commandFlags);
     Message_t   diagData;
 
-    if( (flags & COMMAND_ENABLE_CURVATURE_DIAG) != 0)
+    if( (flags & COMMAND_ENABLE_CURVATURE_DIAG) != 0 )
     {
         diagData.Id = ID_CURVATURE;
         diagData.Data.F = gData.Input.curvature;
         xQueueSendToBack(q_DiagnosticData, &diagData, 0);
     }
 
-    if( (flags & COMMAND_ENABLE_LATERAL_DEVIATION_DIAG) != 0)
+    if( (flags & COMMAND_ENABLE_LATERAL_DEVIATION_DIAG) != 0 )
     {
         diagData.Id = ID_LATERAL_DEVIATION;
         diagData.Data.F = gData.Input.lateralDeviation;
+        xQueueSendToBack(q_DiagnosticData, &diagData, 0);
+    }
+
+    if( (flags & COMMAND_ENABLE_STEER_ANGLE_DIAG) != 0 )
+    {
+        diagData.Id = ID_LATERAL_CONTROL_STEER_ANGLE;
+
+        if( gData.mode == eMODE_LANE_KEEP )
+        {
+            diagData.Data.U32 = LateralControl_RadToDeg(gData.Output.angle);
+        }
+        else if ( gData.mode == eMODE_MANUAL )
+        {
+            diagData.Data.U32 = LateralControl_RadToDeg(gData.manualSteerAngle);
+        }
+
         xQueueSendToBack(q_DiagnosticData, &diagData, 0);
     }
 }
@@ -208,7 +305,7 @@ static void LateralControl_SendDiagnostic(TimerHandle_t xTimer)
  * @return          void
  */
 //////////////////////////////////////////////////////////////////////////////
-static void Steering_PWMInit(const uint32_t intTimClk, const uint32_t sysclk, const uint8_t Dmin, const uint8_t Dmax, uint32_t* const CCRmin, uint32_t* const CCRmax)
+static void Steering_PWMInit(const uint32_t intTimClk, const uint32_t sysclk, const float Dmin, const float Dmax, uint32_t* const CCRmin, uint32_t* const CCRmax)
 {
     uint8_t     presc   = 0u;
     uint8_t     freq    = 50u;  // 50Hz
@@ -227,8 +324,8 @@ static void Steering_PWMInit(const uint32_t intTimClk, const uint32_t sysclk, co
     timClk  = intTimClk / presc;
     ARR     = timClk / freq;
 
-    *CCRmin = (Dmin * ARR) / 100;
-    *CCRmax = (Dmax * ARR) / 100;
+    *CCRmin = (uint32_t)((Dmin * ARR) / 100);
+    *CCRmax = (uint32_t)((Dmax * ARR) / 100);
 
     htim2.Init.Prescaler    = presc - 1;
     htim2.Init.Period       = ARR;
@@ -252,7 +349,7 @@ static void Steering_PWMInit(const uint32_t intTimClk, const uint32_t sysclk, co
  * @return          current angle CCR value.      
  */
 //////////////////////////////////////////////////////////////////////////////
-static uint32_t LateralControl_AngleToCCR(const double angle, const double angleMin, const double angleMax, const uint32_t CCRmin, const uint32_t CCRmax)
+static uint32_t LateralControl_AngleToCCR(const float angle, const float angleMin, const float angleMax, const uint32_t CCRmin, const uint32_t CCRmax)
 {
     uint32_t CCRout = CCRmin + ((angle - angleMin) / (angleMax - angleMin)) * (CCRmax - CCRmin);
 
@@ -271,7 +368,7 @@ static uint32_t LateralControl_AngleToCCR(const double angle, const double angle
  * @return      constrained value.
  */
 //////////////////////////////////////////////////////////////////////////////
-static double Constrain(const double value, const double min, const double max)
+static double Constrain(const float value, const float min, const float max)
 {
     if (value < min) return min;
     if (value > max) return max;
