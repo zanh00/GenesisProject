@@ -111,6 +111,9 @@ static void JetsonComms_OnMessageReceived(void)
             case ID_LATERAL_DEVIATION:
                 xQueueOverwrite(q_LateralDeviation, &rxMessage.Data.F);
                 break;
+            case ID_RELATIVE_YAW_ANGLE:
+                xQueueOverwrite(q_RelativeYawAngle, &rxMessage.Data.F);
+                break;
             default:
                 // Unrecognised ID
                 break;

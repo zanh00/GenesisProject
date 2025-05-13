@@ -61,6 +61,7 @@
 
 #define ID_CURVATURE                                    128
 #define ID_LATERAL_DEVIATION                            129
+#define ID_RELATIVE_YAW_ANGLE                           131
 
 //////////////////////////////////////////////////////////////////////////////
 // Status Flags
@@ -82,6 +83,7 @@
 #define COMMAND_ENABLE_CURVATURE_DIAG           (1 << 4)
 #define COMMAND_ENABLE_LATERAL_DEVIATION_DIAG   (1 << 5)
 #define COMMAND_ENABLE_STEER_ANGLE_DIAG         (1 << 6)
+#define COMMAND_ENABLE_REL_YAW_ANGLE_DIAG       (1 << 7)
 
 
 

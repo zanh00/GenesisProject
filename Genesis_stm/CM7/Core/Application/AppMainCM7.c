@@ -42,6 +42,7 @@ QueueHandle_t       q_DiagnosticData        = NULL;
 QueueHandle_t       q_LongitudinalTaskData  = NULL;
 QueueHandle_t       q_Curvature             = NULL;
 QueueHandle_t       q_LateralDeviation      = NULL;
+QueueHandle_t       q_RelativeYawAngle      = NULL;
 QueueHandle_t       q_speed                 = NULL;
 QueueHandle_t       q_ManualSteerAngle      = NULL;
 
@@ -86,10 +87,11 @@ void Main_Task(void* pvParameters)
     const TickType_t    taskPeriod  = pdMS_TO_TICKS(MAIN_TASK_PERIOD_MS);
 
     q_UserCommand           = xQueueCreate(1, sizeof(uint32_t));
-    q_DiagnosticData        = xQueueCreate(5, sizeof(Message_t));
+    q_DiagnosticData        = xQueueCreate(8, sizeof(Message_t));
     q_LongitudinalTaskData  = xQueueCreate(5, sizeof(Message_t));
     q_Curvature             = xQueueCreate(1, sizeof(float));
     q_LateralDeviation      = xQueueCreate(1, sizeof(float));
+    q_RelativeYawAngle      = xQueueCreate(1, sizeof(float));
     q_speed                 = xQueueCreate(1, sizeof(uint32_t));
     q_ManualSteerAngle      = xQueueCreate(1, sizeof(uint32_t));
 

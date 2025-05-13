@@ -55,7 +55,7 @@
 #define MANUAL_CONTROL_ACCELERATION     180
 #define MANUAL_CONTROL_SPEED            30
 
-#define PID_KP                          1
+#define PID_KP                          0.5
 #define PID_KI                          0.1
 #define PID_KD                          0
 #define PID_SAMPLE_TIME                 LONGITUDINAL_CONTROL_PERIOD_MS
@@ -83,7 +83,7 @@ typedef struct
 // Global Variables 
 //////////////////////////////////////////////////////////////////////////////
 
-            uint16_t            gDevAddress = 0xB0 << 1;
+            uint16_t            gDevAddress = 0xB1;
 DMA_BUFFER  uint8_t             gDmaTxBuffer_lc;
             SemaphoreHandle_t   txSemphr;
 
@@ -121,6 +121,7 @@ static void         LongitudinalControl_AutomaticMode           (void);
 void LongitudinalControl_Task(void* pvParameters)
 {
     EventBits_t     events;
+    EventBits_t     status;
     PIDMode         pidMode         = MANUAL;
     PIDDirection    pidDirection    = DIRECT;
     TickType_t      lastWakeTime;
@@ -159,9 +160,11 @@ void LongitudinalControl_Task(void* pvParameters)
     while(1)
     {
         events = xEventGroupWaitBits(e_commandFlags, COMMAND_MANUAL_DRIVE | COMMAND_LANE_KEEP_MODE, pdFALSE, pdFALSE, WAIT_MODE_EVENT);
+        status = xEventGroupGetBits(e_statusFlags);
 
         LongitudinalControl_ReadData();
 
+        
         if( (events & COMMAND_MANUAL_DRIVE) != 0 )
         {
             if( pidMode != MANUAL )
@@ -170,8 +173,8 @@ void LongitudinalControl_Task(void* pvParameters)
                 PIDModeSet(&gPid, pidMode);
             }
             LongitudinalControl_ManualControl();
-        }
-        else if( (events & COMMAND_LANE_KEEP_MODE) != 0 )
+        } // If either the esp or the jetson communication is not working we stop the vehicle or allow manual control
+        else if( ((events & COMMAND_LANE_KEEP_MODE) != 0 ) && ((status & (SF_ESP_COMMUNICTAION_TIMEOUT | SF_JETSON_COMMUNICTAION_TIMEOUT)) == 0) )
         {
             if( pidMode != AUTOMATIC )
             {
@@ -180,7 +183,7 @@ void LongitudinalControl_Task(void* pvParameters)
             }
             LongitudinalControl_AutomaticMode();
         }
-        else if( gLongitudinalControl.speed != 0 )
+        else
         { 
             LongitudinalControl_StopTheVehicle();   
         }

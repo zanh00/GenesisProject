@@ -46,6 +46,7 @@ typedef struct LateralControlData
     {
         float curvature;
         float lateralDeviation;
+        float relativeYawAngle;
         float velocity;
     } Input;
     struct 
@@ -84,6 +85,7 @@ static double   Constrain                       (const float value, const float 
 void LateralControl_Task(void* pvParameter)
 {
     EventBits_t             commandFlags;
+    EventBits_t             status;
     TickType_t              lastWakeTime;
     uint32_t                CCRmin          = 0; 
     uint32_t                CCRmax          = 0;
@@ -121,7 +123,8 @@ void LateralControl_Task(void* pvParameter)
     while(1)
     {
         uint32_t steerCCR = 0;
-        commandFlags = xEventGroupWaitBits(e_commandFlags, COMMAND_MANUAL_DRIVE | COMMAND_LANE_KEEP_MODE, pdFALSE, pdFALSE, 0);
+        commandFlags    = xEventGroupWaitBits(e_commandFlags, COMMAND_MANUAL_DRIVE | COMMAND_LANE_KEEP_MODE, pdFALSE, pdFALSE, 0);
+        status          = xEventGroupGetBits(e_statusFlags);
 
         LateralControl_ReadData(&gData);
 
@@ -130,8 +133,9 @@ void LateralControl_Task(void* pvParameter)
             gData.mode = eMODE_MANUAL;
             steerCCR = LateralControl_AngleToCCR(gData.manualSteerAngle, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD, CCRmin, CCRmax);
             LateralControl_SetSteerAngle(steerCCR);
-        }
-        else if( (commandFlags & COMMAND_LANE_KEEP_MODE) != 0 )
+        } // If esp or jetson communication is not working we stop the vehicle or allow manual control
+        else if(    ((commandFlags & COMMAND_LANE_KEEP_MODE) != 0) && 
+                    ((status & (SF_ESP_COMMUNICTAION_TIMEOUT | SF_JETSON_COMMUNICTAION_TIMEOUT)) == 0) )
         {
             gData.mode = eMODE_LANE_KEEP;
             LateralControl_Step(&gData);
@@ -165,7 +169,7 @@ void LateralControl_Task(void* pvParameter)
 static void LateralControl_Step(LateralControlData_t* const data)
 {
     rtU.lateral_deviation       = data->Input.lateralDeviation;
-    rtU.relative_yaw_angle      = 0;                            // TODO: Implement relative yaw angle
+    rtU.relative_yaw_angle      = data->Input.relativeYawAngle;
     rtU.curvature               = data->Input.curvature;
     rtU.velocity_sim            = data->Input.velocity;
 
@@ -203,6 +207,7 @@ static void LateralControl_ReadData(LateralControlData_t* const data)
 
     xQueuePeek(q_Curvature, &(data->Input.curvature), 0);
     xQueuePeek(q_LateralDeviation, &(data->Input.lateralDeviation), 0);
+    xQueuePeek(q_RelativeYawAngle, &(data->Input.relativeYawAngle), 0);
     xQueuePeek(q_ManualSteerAngle, &manualSteerAngleTemp, 0);
     xQueuePeek(q_speed, &(data->Input.velocity), 0);
     // steering angle is shifted by 30 degrees to avoid having to use int32 values in the messages
@@ -231,6 +236,7 @@ static float LateralControl_DegToRad(const int32_t deg)
  * get the steering angle in the range of 0-60° so that we don't have to use 
  * int32 values in the messages.
  * TODO: This is a temporary solution and should be made to work with int32 values
+ * TODO: For fuck sake just use float
  * 
  * @param[in]       rad     angle in radians
  * 
@@ -268,6 +274,13 @@ static void LateralControl_SendDiagnostic(TimerHandle_t xTimer)
     {
         diagData.Id = ID_LATERAL_DEVIATION;
         diagData.Data.F = gData.Input.lateralDeviation;
+        xQueueSendToBack(q_DiagnosticData, &diagData, 0);
+    }
+
+    if( (flags & COMMAND_ENABLE_REL_YAW_ANGLE_DIAG) != 0 )
+    {
+        diagData.Id = ID_RELATIVE_YAW_ANGLE;
+        diagData.Data.F = gData.Input.relativeYawAngle;
         xQueueSendToBack(q_DiagnosticData, &diagData, 0);
     }
 

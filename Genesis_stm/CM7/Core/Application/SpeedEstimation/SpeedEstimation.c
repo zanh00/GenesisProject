@@ -155,10 +155,12 @@ static float SpeedEstimation_CalculateSensorOutputFreq(const uint32_t timerFreq)
     double  avgPeriod = 0;
     float   freq      = 0;
 
+    taskENTER_CRITICAL();
     for( uint8_t i = 0; i < SPEEDESTIMATION_SAMPLE_COUNT - 1; i++ )
     {
         avgPeriod += gSpeedEstimation_TimeCaptures[i+1] - gSpeedEstimation_TimeCaptures[i];
     }
+    taskEXIT_CRITICAL();
 
     avgPeriod = avgPeriod / (SPEEDESTIMATION_SAMPLE_COUNT - 1);
     freq = (1 / avgPeriod) * timerFreq;
