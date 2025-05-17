@@ -92,7 +92,7 @@ void Main_Task(void* pvParameters)
     q_Curvature             = xQueueCreate(1, sizeof(float));
     q_LateralDeviation      = xQueueCreate(1, sizeof(float));
     q_RelativeYawAngle      = xQueueCreate(1, sizeof(float));
-    q_speed                 = xQueueCreate(1, sizeof(uint32_t));
+    q_speed                 = xQueueCreate(1, sizeof(float));
     q_ManualSteerAngle      = xQueueCreate(1, sizeof(uint32_t));
 
     t_statusTimer = xTimerCreate("Status timer", SEND_STATUS_FLAG_PERIOD, pdTRUE, NULL, SendStatusUpdateCallback);

@@ -232,11 +232,7 @@ static float LateralControl_DegToRad(const int32_t deg)
 
 //////////////////////////////////////////////////////////////////////////////
 /**
- * Function converts radians to degrees. And shifts the value by 30 degrees to
- * get the steering angle in the range of 0-60° so that we don't have to use 
- * int32 values in the messages.
- * TODO: This is a temporary solution and should be made to work with int32 values
- * TODO: For fuck sake just use float
+ * Function converts radians to degrees.
  * 
  * @param[in]       rad     angle in radians
  * 
@@ -245,9 +241,9 @@ static float LateralControl_DegToRad(const int32_t deg)
 //////////////////////////////////////////////////////////////////////////////
 static uint32_t LateralControl_RadToDeg(const float rad)
 {
-    const int32_t deg =  rad * (180.0 / PI);
+    const float deg =  rad * (180.0 / PI);
 
-    return deg + 30;
+    return deg;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -290,11 +286,11 @@ static void LateralControl_SendDiagnostic(TimerHandle_t xTimer)
 
         if( gData.mode == eMODE_LANE_KEEP )
         {
-            diagData.Data.U32 = LateralControl_RadToDeg(gData.Output.angle);
+            diagData.Data.F = LateralControl_RadToDeg(gData.Output.angle);
         }
         else if ( gData.mode == eMODE_MANUAL )
         {
-            diagData.Data.U32 = LateralControl_RadToDeg(gData.manualSteerAngle);
+            diagData.Data.F = LateralControl_RadToDeg(gData.manualSteerAngle);
         }
 
         xQueueSendToBack(q_DiagnosticData, &diagData, 0);
