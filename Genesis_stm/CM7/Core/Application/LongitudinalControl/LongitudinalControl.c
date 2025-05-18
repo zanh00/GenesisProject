@@ -53,7 +53,7 @@
 
 #define STOP_VEHICLE_ACCELERATION       128
 #define MANUAL_CONTROL_ACCELERATION     180
-#define MANUAL_CONTROL_SPEED            30
+#define MANUAL_CONTROL_SPEED            100
 
 #define PID_KP                          0.5
 #define PID_KI                          0.1

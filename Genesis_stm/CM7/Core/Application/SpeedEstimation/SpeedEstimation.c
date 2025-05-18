@@ -98,7 +98,9 @@ void SpeedEstimation_Task(void* pvParameters)
     {
         /* 
             If the timer captured values are not the same as in previous execution, calculate new speed,
-            otherwise the rotation is slow enough that we can assume speed as 0. 
+            otherwise the rotation is slow enough that we can assume speed as 0.
+            At the speed estimation task period of of 200 ms, everything bellow 0.5 m/s is gonna be ocscillating
+            between 0 and the actual speed.
         */
         if( SpeedEstimation_NewValuesCaptured(prevCaptures) )
         {

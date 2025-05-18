@@ -239,7 +239,7 @@ static float LateralControl_DegToRad(const int32_t deg)
  * @return          angle in degrees
  */
 //////////////////////////////////////////////////////////////////////////////
-static uint32_t LateralControl_RadToDeg(const float rad)
+static float LateralControl_RadToDeg(const float rad)
 {
     const float deg =  rad * (180.0 / PI);
 
@@ -288,7 +288,7 @@ static void LateralControl_SendDiagnostic(TimerHandle_t xTimer)
         {
             diagData.Data.F = LateralControl_RadToDeg(gData.Output.angle);
         }
-        else if ( gData.mode == eMODE_MANUAL )
+        else
         {
             diagData.Data.F = LateralControl_RadToDeg(gData.manualSteerAngle);
         }
