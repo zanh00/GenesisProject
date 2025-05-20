@@ -138,6 +138,7 @@ HSEM notification */
   MX_I2C1_Init();
   MX_USART1_UART_Init();
   MX_DAC1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   // Set NVIC priority grouping for FreeRTOS compatibility
