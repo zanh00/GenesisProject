@@ -34,6 +34,7 @@
 
 #include "LongitudinalControl.h"
 #include "pid_controller.h"
+#include "ClockHandling.h"
 
 
 
@@ -42,7 +43,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #define WAIT_MODE_EVENT                 pdMS_TO_TICKS(200)
-#define MANUAL_COMMAND_TIMEOUT_TICKS    pdMS_TO_TICKS(200)
+#define MANUAL_COMMAND_TIMEOUT_TICKS    pdMS_TO_TICKS(500)
 
 #define SOFTWARE_REV_REGISTER_ADDR      0x7
 #define DRIVER_COMMAND_REGISTER         0
@@ -53,14 +54,14 @@
 
 #define STOP_VEHICLE_ACCELERATION       128
 #define MANUAL_CONTROL_ACCELERATION     180
-#define MANUAL_CONTROL_SPEED            100
+#define MANUAL_CONTROL_SPEED            30
 
 #define PID_KP                          0.5
 #define PID_KI                          0.1
 #define PID_KD                          0
-#define PID_SAMPLE_TIME                 LONGITUDINAL_CONTROL_PERIOD_MS
+#define PID_SAMPLE_TIME                 LONGITUDINAL_CONTROL_PERIOD_MS / 1000.0f
 #define PID_MIN_SPEED_VALUE             0
-#define PID_MAX_SPEED_VALUE             200
+#define PID_MAX_SPEED_VALUE             100
 
 typedef enum
 {
@@ -98,6 +99,13 @@ LongitduindalControl_Handle_t   gLongitudinalControl = {
 
 PIDControl gPid;
 
+ClockHandling_PWMConfig_t gLongitudinalControl_PWMConfig = {
+    .htim           = &htim3,
+    .frequency      = 20000, // 20kHz
+    .Dmin           = 0,
+    .Dmax           = 100
+};
+
 //////////////////////////////////////////////////////////////////////////////
 // Function prototypes 
 //////////////////////////////////////////////////////////////////////////////
@@ -113,6 +121,10 @@ static Direction_e  LongitudinalControl_StateStopped            (void);
 static Direction_e  LongitudinalControl_StateForward            (void);
 static Direction_e  LongitudinalControl_StateBackwards          (void);
 static void         LongitudinalControl_AutomaticMode           (void);
+static void         LongitudinalControl_SetPWMValue             (const uint8_t dutyCycle);
+static void         LongitudinalControl_SetDirection            (const Direction_e direction);
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // FreeRTOS Task
@@ -145,9 +157,10 @@ void LongitudinalControl_Task(void* pvParameters)
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 #else
-    HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
-    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_8B_R, 0);
-    HAL_GPIO_WritePin(DIRECTION_SELECT_GPIO_Port, DIRECTION_SELECT_Pin, GPIO_PIN_SET); // 1 -> forward; 0 -> backward
+    ClockHandling_PWMInit(&gLongitudinalControl_PWMConfig);
+    LongitudinalControl_SetPWMValue(0);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+    LongitudinalControl_SetDirection(eFORWARD);
 #endif
 
     PIDInit(&gPid, PID_KP, PID_KI, PID_KD, PID_SAMPLE_TIME, PID_MIN_SPEED_VALUE, PID_MAX_SPEED_VALUE, pidMode, pidDirection);
@@ -173,7 +186,7 @@ void LongitudinalControl_Task(void* pvParameters)
                 PIDModeSet(&gPid, pidMode);
             }
             LongitudinalControl_ManualControl();
-        } // If either the esp or the jetson communication is not working we stop the vehicle or allow manual control
+        } // If either the esp or the jetson communication is not working we stop the vehicle or allow only manual control
         else if( ((events & COMMAND_LANE_KEEP_MODE) != 0 ) && ((status & (SF_ESP_COMMUNICTAION_TIMEOUT | SF_JETSON_COMMUNICTAION_TIMEOUT)) == 0) )
         {
             if( pidMode != AUTOMATIC )
@@ -232,7 +245,8 @@ static void LongitudinalControl_StopTheVehicle(void)
     LongitudinalControl_WriteToDriver(DRIVER_SPEED_REGISTER, 0);
     LongitudinalControl_WriteToDriver(DRIVER_COMMAND_REGISTER, 1); // 1 -> forward
 #else
-    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_8B_R, 0);
+    LongitudinalControl_SetPWMValue(0);
+    
 #endif
 }
 
@@ -242,8 +256,8 @@ static void LongitudinalControl_MoveForward(const uint8_t desiredSpeed)
     LongitudinalControl_WriteToDriver(DRIVER_SPEED_REGISTER, desiredSpeed);
     LongitudinalControl_WriteToDriver(DRIVER_COMMAND_REGISTER, 1); // 1 -> forward
 #else
-    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_8B_R, desiredSpeed);
-    HAL_GPIO_WritePin(DIRECTION_SELECT_GPIO_Port, DIRECTION_SELECT_Pin, GPIO_PIN_SET); // 1 -> forward; 0 -> backward
+    LongitudinalControl_SetPWMValue(desiredSpeed);
+    LongitudinalControl_SetDirection(eFORWARD);
 #endif
 }
 
@@ -253,8 +267,8 @@ static void LongitudinalControl_MoveBackward(void)
     LongitudinalControl_WriteToDriver(DRIVER_SPEED_REGISTER, MANUAL_CONTROL_SPEED);
     LongitudinalControl_WriteToDriver(DRIVER_COMMAND_REGISTER, 2); // 1 -> revese
 #else
-    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_8B_R, MANUAL_CONTROL_SPEED);
-    HAL_GPIO_WritePin(DIRECTION_SELECT_GPIO_Port, DIRECTION_SELECT_Pin, GPIO_PIN_RESET); // 1 -> forward; 0 -> backward
+    LongitudinalControl_SetPWMValue(MANUAL_CONTROL_SPEED);
+    LongitudinalControl_SetDirection(eBACKWARD);
 #endif
 }
 
@@ -398,6 +412,37 @@ static void LongitudinalControl_AutomaticMode(void)
     pidOutput = (uint8_t) PIDOutputGet(&gPid);
 
     LongitudinalControl_MoveForward(pidOutput);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/**
+ * Function sets the PWM value for the motor driver.
+ * 
+ * @param[in]       dutyCycle   PWM value in percent
+ */
+////////////////////////////////////////////////////////////////////////////////
+static void LongitudinalControl_SetPWMValue(const uint8_t dutyCycle)
+{
+    if( dutyCycle > 100 )
+    {
+        return;
+    }
+
+    const uint32_t ccrVal = gLongitudinalControl_PWMConfig.CCRmin + ((gLongitudinalControl_PWMConfig.CCRmax - gLongitudinalControl_PWMConfig.CCRmin) * dutyCycle) / 100; 
+    __HAL_TIM_SET_COMPARE(gLongitudinalControl_PWMConfig.htim, TIM_CHANNEL_1, ccrVal);
+}
+
+static void LongitudinalControl_SetDirection(const Direction_e direction)
+{
+    if( direction == eFORWARD )
+    {
+        HAL_GPIO_WritePin(DIRECTION_SELECT_GPIO_Port, DIRECTION_SELECT_Pin, GPIO_PIN_RESET); // 0 -> forward
+    }
+    else
+    {
+        HAL_GPIO_WritePin(DIRECTION_SELECT_GPIO_Port, DIRECTION_SELECT_Pin, GPIO_PIN_SET); // 1 -> backward
+    }
+
 }
 
 void HAL_I2C_MemTxCpltCallback(I2C_HandleTypeDef *hi2c)
