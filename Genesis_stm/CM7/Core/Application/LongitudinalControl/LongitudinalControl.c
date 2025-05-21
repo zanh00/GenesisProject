@@ -187,7 +187,8 @@ void LongitudinalControl_Task(void* pvParameters)
             }
             LongitudinalControl_ManualControl();
         } // If either the esp or the jetson communication is not working we stop the vehicle or allow only manual control
-        else if( ((events & COMMAND_LANE_KEEP_MODE) != 0 ) && ((status & (SF_ESP_COMMUNICTAION_TIMEOUT | SF_JETSON_COMMUNICTAION_TIMEOUT)) == 0) )
+        //else if( ((events & COMMAND_LANE_KEEP_MODE) != 0 ) && ((status & (SF_ESP_COMMUNICTAION_TIMEOUT | SF_JETSON_COMMUNICTAION_TIMEOUT)) == 0) )
+        else if( ((events & COMMAND_LANE_KEEP_MODE) != 0 ))
         {
             if( pidMode != AUTOMATIC )
             {
@@ -405,11 +406,13 @@ static void LongitudinalControl_AutomaticMode(void)
 {
     uint8_t pidOutput;
 
-    PIDSetpointSet  (&gPid, gLongitudinalControl.requestedSpeed);
-    PIDInputSet     (&gPid, gLongitudinalControl.speed);
-    PIDCompute      (&gPid);
+    // PIDSetpointSet  (&gPid, gLongitudinalControl.requestedSpeed);
+    // PIDInputSet     (&gPid, gLongitudinalControl.speed);
+    // PIDCompute      (&gPid);
 
-    pidOutput = (uint8_t) PIDOutputGet(&gPid);
+    // pidOutput = (uint8_t) PIDOutputGet(&gPid);
+
+    pidOutput = gLongitudinalControl.requestedSpeed * 5;
 
     LongitudinalControl_MoveForward(pidOutput);
 }

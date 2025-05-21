@@ -71,7 +71,7 @@ LateralControlData_t gData = {{0}, {0}, 0, 0};
 
 static void     LateralControl_Step             (LateralControlData_t* const data);
 static void     LateralControl_ReadData         (LateralControlData_t* const data);
-static float    LateralControl_DegToRad         (const int32_t deg);
+static float    LateralControl_DegToRad         (const float deg);
 static void     LateralControl_SendDiagnostic   (TimerHandle_t xTimer);
 static void     LateralControl_SetSteerAngle    (const uint32_t angleCCR);
 static void     Steering_PWMInit                (const uint32_t intTimClk, const uint32_t sysclk, const float Dmin, const float Dmax, uint32_t* const CCRmin, uint32_t* const CCRmax);
@@ -134,13 +134,14 @@ void LateralControl_Task(void* pvParameter)
             steerCCR = LateralControl_AngleToCCR(gData.manualSteerAngle, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD, CCRmin, CCRmax);
             LateralControl_SetSteerAngle(steerCCR);
         } // If esp or jetson communication is not working we stop the vehicle or allow manual control
-        else if(    ((commandFlags & COMMAND_LANE_KEEP_MODE) != 0) && 
-                    ((status & (SF_ESP_COMMUNICTAION_TIMEOUT | SF_JETSON_COMMUNICTAION_TIMEOUT)) == 0) )
+        else if(    ((commandFlags & COMMAND_LANE_KEEP_MODE) != 0))// && 
+                    //((status & (SF_ESP_COMMUNICTAION_TIMEOUT | SF_JETSON_COMMUNICTAION_TIMEOUT)) == 0) )
         {
             gData.mode = eMODE_LANE_KEEP;
             LateralControl_Step(&gData);
 
             // The value should already be constrained in the model...but just in case
+            gData.Output.angle  = LateralControl_DegToRad(gData.Output.angle);
             gData.Output.angle  = Constrain(gData.Output.angle, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD);
             steerCCR            = LateralControl_AngleToCCR(gData.Output.angle, -MAX_STEER_ANGLE_RAD, MAX_STEER_ANGLE_RAD, CCRmin, CCRmax);
             LateralControl_SetSteerAngle(steerCCR);
@@ -209,10 +210,11 @@ static void LateralControl_ReadData(LateralControlData_t* const data)
     xQueuePeek(q_LateralDeviation, &(data->Input.lateralDeviation), 0);
     xQueuePeek(q_RelativeYawAngle, &(data->Input.relativeYawAngle), 0);
     xQueuePeek(q_ManualSteerAngle, &manualSteerAngleTemp, 0);
-    xQueuePeek(q_speed, &(data->Input.velocity), 0);
+    //xQueuePeek(q_speed, &(data->Input.velocity), 0);
+    data->Input.velocity = 0.2f;
     // steering angle is shifted by 30 degrees to avoid having to use int32 values in the messages
     // manualSteerAngleTemp: 0-> -30°; 60 -> 30°
-    gData.manualSteerAngle = LateralControl_DegToRad(manualSteerAngleTemp - 30);
+    gData.manualSteerAngle = LateralControl_DegToRad(((float)manualSteerAngleTemp) - 30.f);
 
 }
 
@@ -225,7 +227,7 @@ static void LateralControl_ReadData(LateralControlData_t* const data)
  * @return          angle in radians
  */
 //////////////////////////////////////////////////////////////////////////////
-static float LateralControl_DegToRad(const int32_t deg)
+static float LateralControl_DegToRad(const float deg)
 {
     return deg * (PI / 180.0);
 }

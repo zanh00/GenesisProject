@@ -22,10 +22,10 @@
 #define SPEEDESTIMATION_PERIOD_MS               200
 
 // Period in which vehicle speed measurement will be sent out to diagnostic queue
-#define DIAGNOSTIC_SPEED_PERIOD_MS              600
+#define DIAGNOSTIC_SPEED_PERIOD_MS              2000
 
 // Period with which lateral contorl module diagnostic data will be sent to diagnostic queue
-#define DIAGNOSTIC_LATERAL_CONTROL_PERIOD_MS    1000
+#define DIAGNOSTIC_LATERAL_CONTROL_PERIOD_MS    500
 
 //////////////////////////////////////////////////////////////////////////////
 // General
