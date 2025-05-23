@@ -25,7 +25,7 @@
 #define DIAGNOSTIC_SPEED_PERIOD_MS              2000
 
 // Period with which lateral contorl module diagnostic data will be sent to diagnostic queue
-#define DIAGNOSTIC_LATERAL_CONTROL_PERIOD_MS    500
+#define DIAGNOSTIC_LATERAL_CONTROL_PERIOD_MS    200
 
 //////////////////////////////////////////////////////////////////////////////
 // General

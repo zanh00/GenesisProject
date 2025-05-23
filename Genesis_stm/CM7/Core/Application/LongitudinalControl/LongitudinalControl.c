@@ -406,6 +406,8 @@ static void LongitudinalControl_AutomaticMode(void)
 {
     uint8_t pidOutput;
 
+    //TODO: The speed sensor doesn't work yet so fixed speed is used
+    
     // PIDSetpointSet  (&gPid, gLongitudinalControl.requestedSpeed);
     // PIDInputSet     (&gPid, gLongitudinalControl.speed);
     // PIDCompute      (&gPid);
