@@ -98,7 +98,9 @@ void SpeedEstimation_Task(void* pvParameters)
     {
         /* 
             If the timer captured values are not the same as in previous execution, calculate new speed,
-            otherwise the rotation is slow enough that we can assume speed as 0. 
+            otherwise the rotation is slow enough that we can assume speed as 0.
+            At the speed estimation task period of of 200 ms, everything bellow 0.5 m/s is gonna be ocscillating
+            between 0 and the actual speed.
         */
         if( SpeedEstimation_NewValuesCaptured(prevCaptures) )
         {
@@ -155,10 +157,12 @@ static float SpeedEstimation_CalculateSensorOutputFreq(const uint32_t timerFreq)
     double  avgPeriod = 0;
     float   freq      = 0;
 
+    taskENTER_CRITICAL();
     for( uint8_t i = 0; i < SPEEDESTIMATION_SAMPLE_COUNT - 1; i++ )
     {
         avgPeriod += gSpeedEstimation_TimeCaptures[i+1] - gSpeedEstimation_TimeCaptures[i];
     }
+    taskEXIT_CRITICAL();
 
     avgPeriod = avgPeriod / (SPEEDESTIMATION_SAMPLE_COUNT - 1);
     freq = (1 / avgPeriod) * timerFreq;

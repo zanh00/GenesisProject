@@ -19,13 +19,13 @@
 
 #define LONGITUDINAL_CONTROL_PERIOD_MS          50
 #define LATERAL_CONTROL_PERIOD_MS               20
-#define SPEEDESTIMATION_PERIOD_MS               50
+#define SPEEDESTIMATION_PERIOD_MS               200
 
 // Period in which vehicle speed measurement will be sent out to diagnostic queue
-#define DIAGNOSTIC_SPEED_PERIOD_MS              1000
+#define DIAGNOSTIC_SPEED_PERIOD_MS              2000
 
 // Period with which lateral contorl module diagnostic data will be sent to diagnostic queue
-#define DIAGNOSTIC_LATERAL_CONTROL_PERIOD_MS    1000
+#define DIAGNOSTIC_LATERAL_CONTROL_PERIOD_MS    200
 
 //////////////////////////////////////////////////////////////////////////////
 // General
@@ -52,7 +52,7 @@
 #define ID_LONGITUDINAL_SET_ACCELERATION                7
 #define ID_LONGITUDINAL_MANUAL_CONTROL                  8
 #define ID_LATERAL_CONTROL_MANUAL_STEER_ANGLE           9  
-#define ID_LATERAL_CONTROL_STEER_ANGLE                  10  
+#define ID_LATERAL_CONTROL_STEER_ANGLE                  132  
 #define ID_VEHICLE_SPEED                                130
 
 //////////////////////////////////////////////////////////////////////////////
@@ -61,6 +61,7 @@
 
 #define ID_CURVATURE                                    128
 #define ID_LATERAL_DEVIATION                            129
+#define ID_RELATIVE_YAW_ANGLE                           131
 
 //////////////////////////////////////////////////////////////////////////////
 // Status Flags
@@ -82,6 +83,7 @@
 #define COMMAND_ENABLE_CURVATURE_DIAG           (1 << 4)
 #define COMMAND_ENABLE_LATERAL_DEVIATION_DIAG   (1 << 5)
 #define COMMAND_ENABLE_STEER_ANGLE_DIAG         (1 << 6)
+#define COMMAND_ENABLE_REL_YAW_ANGLE_DIAG       (1 << 7)
 
 
 

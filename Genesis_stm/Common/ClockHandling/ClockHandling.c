@@ -1,7 +1,28 @@
+//////////////////////////////////////////////////////////////////////////////
+/*
+ * ClockHandling.c
+ *
+ *  Created on: July 13, 2024
+ *      Author: Žan Hertiš
+ */
+ ////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+// Includes 
+//////////////////////////////////////////////////////////////////////////////
+
 #include "ClockHandling.h"
 #ifndef __IO
 #define __IO volatile
 #endif
+
+//////////////////////////////////////////////////////////////////////////////
+// Defines 
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+// Function Definitions 
+//////////////////////////////////////////////////////////////////////////////
 
 uint32_t ClockHandling_GetTimerClkFreq(TIM_HandleTypeDef *htim)
 {
@@ -75,4 +96,36 @@ uint32_t ClockHandling_GetTimerClkFreq(TIM_HandleTypeDef *htim)
     }
 
     return timerClock;
+}
+
+void ClockHandling_PWMInit(ClockHandling_PWMConfig_t *config)
+{
+    uint8_t     presc           = 0u;
+    uint32_t    ARR             = 0u;   // auto reload register
+    uint32_t    timClk          = 0u;
+    uint32_t    internalTimClk  = ClockHandling_GetTimerClkFreq(config->htim);
+    uint32_t    sysclk          = HAL_RCC_GetSysClockFreq();
+
+    if( sysclk < 100000000 ) // 100MHz
+    {
+        presc = 4;
+    }
+    else
+    {
+        presc = 8;
+    }
+
+    timClk  = internalTimClk / presc;
+    ARR     = timClk / config->frequency;
+
+    config->CCRmin = (uint32_t)((config->Dmin * ARR) / 100);
+    config->CCRmax = (uint32_t)((config->Dmax * ARR) / 100);
+
+    config->htim->Init.Prescaler    = presc - 1;
+    config->htim->Init.Period       = ARR;
+
+    if( HAL_TIM_Base_Init(config->htim) != HAL_OK )
+    {
+        Error_Handler();
+    }
 }

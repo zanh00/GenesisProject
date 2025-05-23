@@ -156,18 +156,21 @@ bool Seriazlizer_Deserialize(const uint8_t* const serializedData, uint8_t* const
     msbAscii = serializedData[0];
     lsbAscii = serializedData[1];
 
-    if (!Serializer_AsciiToByte(lsbAscii, msbAscii, id)) {
+    if (!Serializer_AsciiToByte(lsbAscii, msbAscii, id)) 
+    {
         return false;
     }
 
     // Deserialize data field
     *data = 0;
 
-    for (uint8_t i = 0; i < SERIALIZER_DATA_FIELD_SIZE; i++) {
+    for (uint8_t i = 0; i < SERIALIZER_DATA_FIELD_SIZE; i++) 
+    {
         msbAscii = serializedData[index++];
         lsbAscii = serializedData[index++];
         
-        if (!Serializer_AsciiToByte(lsbAscii, msbAscii, &tempByte)) {
+        if (!Serializer_AsciiToByte(lsbAscii, msbAscii, &tempByte)) 
+        {
             return false;
         }
 

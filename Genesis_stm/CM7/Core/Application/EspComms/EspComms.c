@@ -207,15 +207,12 @@ static void EspComms_OnMessageReceived(TickType_t* const lastCommsCheck_ticks)
             break;
         
         default:
-            //TODO: set unkonw ID Flag
             return; // unrecognised ID -> exit the function
             break;
         }
 
         // any valid message received counts as a communications check
         *lastCommsCheck_ticks = xTaskGetTickCount();
-
-        //TODO: switch all other possible IDs and send them to appropriate queues 
 
     }
     else

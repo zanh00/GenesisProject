@@ -12,6 +12,8 @@
 //////////////////////////////////////////////////////////////////////////////
 // Includes 
 //////////////////////////////////////////////////////////////////////////////
+#include <stdio.h>
+
 #include "AppMainCM7.h"
 #include "ClockHandling.h"
 #include "Serializer.h"
@@ -42,6 +44,7 @@ QueueHandle_t       q_DiagnosticData        = NULL;
 QueueHandle_t       q_LongitudinalTaskData  = NULL;
 QueueHandle_t       q_Curvature             = NULL;
 QueueHandle_t       q_LateralDeviation      = NULL;
+QueueHandle_t       q_RelativeYawAngle      = NULL;
 QueueHandle_t       q_speed                 = NULL;
 QueueHandle_t       q_ManualSteerAngle      = NULL;
 
@@ -86,11 +89,12 @@ void Main_Task(void* pvParameters)
     const TickType_t    taskPeriod  = pdMS_TO_TICKS(MAIN_TASK_PERIOD_MS);
 
     q_UserCommand           = xQueueCreate(1, sizeof(uint32_t));
-    q_DiagnosticData        = xQueueCreate(5, sizeof(Message_t));
+    q_DiagnosticData        = xQueueCreate(8, sizeof(Message_t));
     q_LongitudinalTaskData  = xQueueCreate(5, sizeof(Message_t));
     q_Curvature             = xQueueCreate(1, sizeof(float));
     q_LateralDeviation      = xQueueCreate(1, sizeof(float));
-    q_speed                 = xQueueCreate(1, sizeof(uint32_t));
+    q_RelativeYawAngle      = xQueueCreate(1, sizeof(float));
+    q_speed                 = xQueueCreate(1, sizeof(float));
     q_ManualSteerAngle      = xQueueCreate(1, sizeof(uint32_t));
 
     t_statusTimer = xTimerCreate("Status timer", SEND_STATUS_FLAG_PERIOD, pdTRUE, NULL, SendStatusUpdateCallback);
@@ -129,7 +133,7 @@ void Main_Task(void* pvParameters)
         Error_Handler();
     }
 
-    if( (xTaskCreate(LateralControl_Task, "Steer control task", 256, NULL, 4, NULL)) != pdPASS )
+    if( (xTaskCreate(LateralControl_Task, "Steer control task", 4096, NULL, 4, NULL)) != pdPASS )
     {
         Error_Handler();
     }
@@ -177,7 +181,7 @@ void Main_Task(void* pvParameters)
 //////////////////////////////////////////////////////////////////////////////
 void AppCM7_Main()
 {
-    if( (xTaskCreate(Main_Task, "Main task", 1024, NULL, 3, NULL)) != pdPASS )
+    if( (xTaskCreate(Main_Task, "Main task", 512, NULL, 3, NULL)) != pdPASS )
     {
         Error_Handler();
     }
@@ -222,12 +226,21 @@ static void SendStatusUpdateCallback(TimerHandle_t xTimer)
 void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName )
 {
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+    printf("Stack overflow in task: %s\n", pcTaskName);
     while(1)
     {
 
     }
 }
 
+void vApplicationMallocFailedHook( void )
+{
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+    while(1)
+    {
+
+    }
+}
 //////////////////////////////////////////////////////////////////////////////
 /**
  * This is an UART Receive complete callback function that is common for all
