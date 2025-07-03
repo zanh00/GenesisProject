@@ -74,6 +74,9 @@ static  void SendStatusUpdateCallback       (TimerHandle_t xTimer);
  * all the tasks will put the data in the same queue (Message structure with ID) that will be directly read
  * and sent out by the esp transmitter task.
  * 
+ * IMPORTANT:
+ * ! CPU2 is currently not used - Disabled in option bytes
+ * 
  */
 
 //////////////////////////////////////////////////////////////////////////////

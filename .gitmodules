@@ -2,3 +2,6 @@
 	path = Genesis_stm/CM7/Core/Application/LateralControl/lateralVehicleController
 	url = ../lateralVehicleController.git
 	branch = main
+[submodule "Genesis_jetson"]
+	path = Genesis_jetson
+	url = ../Genesis_jetson.git

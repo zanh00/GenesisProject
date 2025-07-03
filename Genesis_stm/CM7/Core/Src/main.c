@@ -87,6 +87,7 @@ int main(void)
   MPU_Config();
 
 /* USER CODE BEGIN Boot_Mode_Sequence_1 */
+  // ! CPU2 is currently not used - Disabled in option bytes
   /* Wait until CPU2 boots and enters in stop mode or timeout*/
   // timeout = 0xFFFF;
   // while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) != RESET) && (timeout-- > 0));
