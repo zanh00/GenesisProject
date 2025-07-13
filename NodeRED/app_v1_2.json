@@ -1,0 +1,1308 @@
+[
+    {
+        "id": "4522ec776ef79fb7",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "80aeb0586fb10632",
+        "type": "subflow",
+        "name": "Transmit node",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 500,
+                "y": 320,
+                "wires": [
+                    {
+                        "id": "cc6569cf15bbfe0e"
+                    }
+                ]
+            }
+        ],
+        "out": [],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
+    },
+    {
+        "id": "a5e59851dbab1674",
+        "type": "subflow",
+        "name": "Receive node",
+        "info": "",
+        "category": "",
+        "in": [],
+        "out": [
+            {
+                "x": 1120,
+                "y": 223,
+                "wires": [
+                    {
+                        "id": "34868ebb94170eaf",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 1120,
+                "y": 283,
+                "wires": [
+                    {
+                        "id": "4ccac03a945f40cd",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 1120,
+                "y": 343,
+                "wires": [
+                    {
+                        "id": "a3f423aa012dad74",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 1120,
+                "y": 403,
+                "wires": [
+                    {
+                        "id": "2d6e3b9ce9178843",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 1120,
+                "y": 463,
+                "wires": [
+                    {
+                        "id": "425b9ec96a9b41f2",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 1120,
+                "y": 520,
+                "wires": [
+                    {
+                        "id": "c5ead2c934251a92",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
+    },
+    {
+        "id": "cc2252e978f0d9ec",
+        "type": "group",
+        "z": "4522ec776ef79fb7",
+        "style": {
+            "stroke": "#999999",
+            "stroke-opacity": "1",
+            "fill": "none",
+            "fill-opacity": "1",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "12fad5273c09ac7d",
+            "69a74f81ea3df8a8"
+        ],
+        "x": 94,
+        "y": 719,
+        "w": 212,
+        "h": 142
+    },
+    {
+        "id": "7f5d1b325d571f3c",
+        "type": "group",
+        "z": "4522ec776ef79fb7",
+        "style": {
+            "stroke": "#999999",
+            "stroke-opacity": "1",
+            "fill": "none",
+            "fill-opacity": "1",
+            "label": true,
+            "label-position": "nw",
+            "color": "#a4a4a4"
+        },
+        "nodes": [
+            "3a2e59b07ea9f1a7",
+            "e1d592b02c7e67aa"
+        ],
+        "x": 94,
+        "y": 919,
+        "w": 232,
+        "h": 142
+    },
+    {
+        "id": "706143058f1c52ee",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "dcfbe0920896e5c3",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "navigationStyle": "default",
+        "titleBarStyle": "default"
+    },
+    {
+        "id": "1ed1f4a77ec33720",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#0094CE",
+            "bgPage": "#eeeeee",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "bf027c82725a25e7",
+        "type": "ui-page",
+        "name": "Page 1",
+        "ui": "dcfbe0920896e5c3",
+        "path": "/page1",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "1ed1f4a77ec33720",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "1c7ccf4a3006b754",
+        "type": "ui-group",
+        "name": "Diagnostic Data",
+        "page": "bf027c82725a25e7",
+        "width": "6",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "58c8e91b2efda262",
+        "type": "ui-group",
+        "name": "Commands",
+        "page": "bf027c82725a25e7",
+        "width": "6",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "a7533ca401e5d7f5",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "test.mosquitto.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "fb5864e4da03d5cb",
+        "type": "ui-group",
+        "name": "Set values",
+        "page": "bf027c82725a25e7",
+        "width": "6",
+        "height": "1",
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "e67b0d2962111ac0",
+        "type": "ui-page",
+        "name": "Page 2",
+        "ui": "dcfbe0920896e5c3",
+        "path": "/page2",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "1ed1f4a77ec33720",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 2,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "7816832a6fb075c8",
+        "type": "ui-group",
+        "name": "Chart1",
+        "page": "e67b0d2962111ac0",
+        "width": "14",
+        "height": "7",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "20a11a89087d66ab",
+        "type": "mqtt out",
+        "z": "80aeb0586fb10632",
+        "name": "",
+        "topic": "zs",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "706143058f1c52ee",
+        "x": 1090,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "cc6569cf15bbfe0e",
+        "type": "function",
+        "z": "80aeb0586fb10632",
+        "name": "Serializer",
+        "func": "// Input: msg.payload should be an object with the following structure:\n// {\n//     dataID: 5,      // Integer (0-255, 8-bit ID)\n//     data: 12345678  // Integer (32-bit data)\n// }\n\n// Extract the dataID and data\nlet dataID = msg.payload.dataID;  // e.g., 5\nlet data = msg.payload.data;      // e.g., 12345678\n\n// start byte\nlet startByte = 'Z'\n\n// Convert the dataID to a 2-character hexadecimal string (ASCII nibbles)\nlet dataIDHex = dataID.toString(16).padStart(2, '0').toUpperCase(); // \"05\"\n\n// Convert the data to an 8-character string\nlet dataStr = data.toString(16).padStart(8, '0').toUpperCase(); // \"12345678\"\n\n// Combine dataIDHex and dataStr into the final string\nmsg.payload = startByte + dataIDHex + dataStr; // \"0512345678\"\n\n// Return the modified message\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 320,
+        "wires": [
+            [
+                "20a11a89087d66ab"
+            ]
+        ]
+    },
+    {
+        "id": "bdf32f5608fbc749",
+        "type": "mqtt in",
+        "z": "a5e59851dbab1674",
+        "name": "",
+        "topic": "zr",
+        "qos": "0",
+        "datatype": "utf8",
+        "broker": "706143058f1c52ee",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 190,
+        "y": 303,
+        "wires": [
+            [
+                "d311f9165228a992"
+            ]
+        ]
+    },
+    {
+        "id": "d311f9165228a992",
+        "type": "function",
+        "z": "a5e59851dbab1674",
+        "name": "Deserializer",
+        "func": "// Input: msg.payload (e.g., \"0512345678\")\n\n// Extract the first two characters (data ID as ASCII nibbles)\nlet dataIDHex = msg.payload.slice(0, 2); // \"05\"\n// Convert the data ID from hexadecimal (ASCII nibbles) to a number\nlet dataID = parseInt(dataIDHex, 16); // 5\n\n// Extract the remaining 8 characters (data)\nlet dataStr = msg.payload.slice(2); // \"12345678\"\n\nlet data; // Variable to hold the parsed data\n\nif (dataID >= 128) {\n    // Parse data as a floating-point number if dataID >= 128\n\n    // Convert hex string to a 32-bit unsigned integer\n    let intVal = parseInt(dataStr, 16);\n\n    // Create a buffer to interpret the integer as a float\n    let buffer = new ArrayBuffer(4); // 4 bytes for a 32-bit float\n    let intView = new Uint32Array(buffer);\n    let floatView = new Float32Array(buffer);\n\n    // Set the integer value in the buffer\n    intView[0] = intVal;\n\n    // Interpret the buffer as a float\n    data = floatView[0].toFixed(2);\n} else {\n    // Parse data as a 32-bit unsigned integer otherwise\n    data = parseInt(dataStr, 16); // Parse as integer\n}\n\n// Construct the output object\nmsg.payload = {\n    dataID: dataID,  // Parsed data ID\n    data: data       // Parsed data (either integer or float)\n};\n\n// Return the modified message\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 303,
+        "wires": [
+            [
+                "4e5ff30f8e4521a9"
+            ]
+        ]
+    },
+    {
+        "id": "4e5ff30f8e4521a9",
+        "type": "switch",
+        "z": "a5e59851dbab1674",
+        "name": "Switch Data ID",
+        "property": "payload.dataID",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "5",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "132",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "128",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "129",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "130",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "131",
+                "vt": "num"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 6,
+        "x": 640,
+        "y": 303,
+        "wires": [
+            [
+                "34868ebb94170eaf"
+            ],
+            [
+                "4ccac03a945f40cd"
+            ],
+            [
+                "a3f423aa012dad74"
+            ],
+            [
+                "2d6e3b9ce9178843"
+            ],
+            [
+                "425b9ec96a9b41f2"
+            ],
+            [
+                "c5ead2c934251a92"
+            ]
+        ]
+    },
+    {
+        "id": "34868ebb94170eaf",
+        "type": "function",
+        "z": "a5e59851dbab1674",
+        "name": "Extract Status flag",
+        "func": "// Extract only the 'data' part of the payload\n// Convert to bit string\nlet value = msg.payload.data;\n\n// Mask upper 16 bits since they are not used\nlet lower16 = value & 0xFFFF\n\nlet binaryStr = lower16.toString(2).padStart(16, '0');\n\nmsg.payload = binaryStr;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 223,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4ccac03a945f40cd",
+        "type": "function",
+        "z": "a5e59851dbab1674",
+        "name": "Extract Steering angle",
+        "func": "// Extract only the 'data' part of the payload\nmsg.payload = msg.payload.data;\nmsg.topic = \"Steering anlge\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 283,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a3f423aa012dad74",
+        "type": "function",
+        "z": "a5e59851dbab1674",
+        "name": "Extract Curvature",
+        "func": "// Extract only the 'data' part of the payload\nmsg.payload = msg.payload.data;\nmsg.topic = \"Curvature\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 343,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2d6e3b9ce9178843",
+        "type": "function",
+        "z": "a5e59851dbab1674",
+        "name": "Extract Lateral Deviation",
+        "func": "// Extract only the 'data' part of the payload\nmsg.payload = msg.payload.data;\nmsg.topic = \"Lateral Deviation\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 403,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "425b9ec96a9b41f2",
+        "type": "function",
+        "z": "a5e59851dbab1674",
+        "name": "Extract Vehcile Speed",
+        "func": "// Extract only the 'data' part of the payload\nmsg.payload = msg.payload.data;\nmsg.topic = \"Vehicle Speed\"\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 463,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c5ead2c934251a92",
+        "type": "function",
+        "z": "a5e59851dbab1674",
+        "name": "Extract Yaw angle",
+        "func": "// Extract only the 'data' part of the payload\nmsg.payload = msg.payload.data;\nmsg.topic = \"Relative Yaw Angle\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 930,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d26039c3f25938b1",
+        "type": "inject",
+        "z": "4522ec776ef79fb7",
+        "d": true,
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "0.5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "x": 310,
+        "y": 320,
+        "wires": [
+            [
+                "a130b33b2736fe59"
+            ]
+        ]
+    },
+    {
+        "id": "4b7d8ef6b3cf3060",
+        "type": "ui-text",
+        "z": "4522ec776ef79fb7",
+        "group": "1c7ccf4a3006b754",
+        "order": 6,
+        "width": "2",
+        "height": "1",
+        "name": "",
+        "label": "Status Flag",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "x": 1190,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "7a9806f4a22b5415",
+        "type": "ui-switch",
+        "z": "4522ec776ef79fb7",
+        "name": "",
+        "label": "Manual Drive",
+        "group": "58c8e91b2efda262",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": false,
+        "topic": "2",
+        "topicType": "str",
+        "style": "",
+        "className": "",
+        "layout": "row-spread",
+        "clickableArea": "switch",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "x": 290,
+        "y": 381,
+        "wires": [
+            [
+                "a130b33b2736fe59"
+            ]
+        ]
+    },
+    {
+        "id": "a130b33b2736fe59",
+        "type": "function",
+        "z": "4522ec776ef79fb7",
+        "name": "Construct command flag",
+        "func": "\n// Retrieve the current 32-bit value from the context (initialize to 0 if undefined)\nlet dataValue = context.get(\"dataValue\") || 0;\n\n// Check if the message includes a button update (msg.topic and msg.payload)\nif (msg.topic && msg.payload !== undefined) {\n    // Parse the byte position from the topic (convert string to integer)\n    let bytePos = parseInt(msg.topic);\n    let isPressed = msg.payload; // Get the button state (true/false)\n\n    // Update the 32-bit value based on the button state\n    if (isPressed) {\n        // Set the bit at the specified position\n        dataValue |= (1 << bytePos);\n    } else {\n        // Clear the bit at the specified position\n        dataValue &= ~(1 << bytePos);\n    }\n\n    // Save the updated 32-bit value back to the context\n    context.set(\"dataValue\", dataValue);\n}\n\n// Return the updated value in the message payload\nmsg.payload = {\n    dataID: 1,\n    data: dataValue\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 421,
+        "wires": [
+            [
+                "c4b81cf2640637c4"
+            ]
+        ]
+    },
+    {
+        "id": "0b3d8bad52ecdce8",
+        "type": "ui-switch",
+        "z": "4522ec776ef79fb7",
+        "name": "",
+        "label": "Lane Keep system",
+        "group": "58c8e91b2efda262",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": false,
+        "topic": "3",
+        "topicType": "str",
+        "style": "",
+        "className": "",
+        "layout": "row-spread",
+        "clickableArea": "switch",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "x": 270,
+        "y": 440,
+        "wires": [
+            [
+                "a130b33b2736fe59"
+            ]
+        ]
+    },
+    {
+        "id": "f6503ed82806ce8a",
+        "type": "ui-text",
+        "z": "4522ec776ef79fb7",
+        "group": "1c7ccf4a3006b754",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Curvature",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "x": 1180,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "bdad1c3e4e6b2c8a",
+        "type": "ui-text",
+        "z": "4522ec776ef79fb7",
+        "group": "1c7ccf4a3006b754",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Lateral Deviation",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "x": 1210,
+        "y": 235,
+        "wires": []
+    },
+    {
+        "id": "a7dd1342f28b26f7",
+        "type": "ui-text",
+        "z": "4522ec776ef79fb7",
+        "group": "1c7ccf4a3006b754",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Vehicle Speed",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "x": 1200,
+        "y": 295,
+        "wires": []
+    },
+    {
+        "id": "2be328d7659a1d45",
+        "type": "ui-switch",
+        "z": "4522ec776ef79fb7",
+        "name": "",
+        "label": "Enable Curvature Diagnostic",
+        "group": "58c8e91b2efda262",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": false,
+        "topic": "4",
+        "topicType": "str",
+        "style": "",
+        "className": "",
+        "layout": "row-spread",
+        "clickableArea": "switch",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "x": 240,
+        "y": 500,
+        "wires": [
+            [
+                "a130b33b2736fe59"
+            ]
+        ]
+    },
+    {
+        "id": "8725d522f68e4a25",
+        "type": "ui-switch",
+        "z": "4522ec776ef79fb7",
+        "name": "",
+        "label": "Enable Lateral Deviation Diagnostic",
+        "group": "58c8e91b2efda262",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": false,
+        "topic": "5",
+        "topicType": "str",
+        "style": "",
+        "className": "",
+        "layout": "row-spread",
+        "clickableArea": "switch",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "x": 220,
+        "y": 560,
+        "wires": [
+            [
+                "a130b33b2736fe59"
+            ]
+        ]
+    },
+    {
+        "id": "96ed02485f278728",
+        "type": "comment",
+        "z": "4522ec776ef79fb7",
+        "name": "Version",
+        "info": "VERSION 1.2\n- Received steering angle is now float value\n- Included a chart that can display the dignostic data\n\nVERSION 1.1\n- Added a steering anlge and and speed setter\n",
+        "x": 1010,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "22393d9a9ffe207f",
+        "type": "ui-switch",
+        "z": "4522ec776ef79fb7",
+        "name": "",
+        "label": "Enable Steering Angle Diagnostic",
+        "group": "58c8e91b2efda262",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": false,
+        "topic": "6",
+        "topicType": "str",
+        "style": "",
+        "className": "",
+        "layout": "row-spread",
+        "clickableArea": "switch",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "x": 220,
+        "y": 620,
+        "wires": [
+            [
+                "a130b33b2736fe59"
+            ]
+        ]
+    },
+    {
+        "id": "1b33e5d7ae245253",
+        "type": "ui-text",
+        "z": "4522ec776ef79fb7",
+        "group": "1c7ccf4a3006b754",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Steering angle",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "x": 1200,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "12fad5273c09ac7d",
+        "type": "ui-number-input",
+        "z": "4522ec776ef79fb7",
+        "g": "cc2252e978f0d9ec",
+        "group": "fb5864e4da03d5cb",
+        "name": "",
+        "label": "Steering angle",
+        "order": 1,
+        "width": "5",
+        "height": "1",
+        "topic": "SteerAng",
+        "topicType": "str",
+        "min": 0,
+        "max": "60",
+        "step": 1,
+        "tooltip": "In degrees, right shifted by 30. 0 means -30°, 30 means 0° and 60 means 30°",
+        "passthru": false,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "",
+        "clearable": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "spinner": "default",
+        "x": 200,
+        "y": 760,
+        "wires": [
+            [
+                "400ec030b87ed52c"
+            ]
+        ]
+    },
+    {
+        "id": "69a74f81ea3df8a8",
+        "type": "ui-button",
+        "z": "4522ec776ef79fb7",
+        "g": "cc2252e978f0d9ec",
+        "group": "fb5864e4da03d5cb",
+        "name": "Send angle",
+        "label": "Send",
+        "order": 2,
+        "width": "1",
+        "height": "1",
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "trigger",
+        "topicType": "str",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 210,
+        "y": 820,
+        "wires": [
+            [
+                "400ec030b87ed52c"
+            ]
+        ]
+    },
+    {
+        "id": "400ec030b87ed52c",
+        "type": "function",
+        "z": "4522ec776ef79fb7",
+        "name": "Set Steering Angle",
+        "func": "// Retrieve stored value from context\nlet storedValue = context.get(\"storedValue\") || 0;\n\n// Check if the message is coming from the numeric input\nif (msg.topic === \"SteerAng\") {\n    context.set(\"storedValue\", msg.payload);\n    return null;  // Do not send any output yet\n}\n\n// Check if the message is coming from the button click\nif (msg.topic === \"trigger\") {\n    let angle = parseInt(context.get(\"storedValue\"))\n    msg.payload = {\n    dataID: 9,\n    data: angle\n    };\n    return msg;\n}\n\n// If neither condition is met, do nothing\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 470,
+        "y": 780,
+        "wires": [
+            [
+                "c4b81cf2640637c4"
+            ]
+        ]
+    },
+    {
+        "id": "c4b81cf2640637c4",
+        "type": "subflow:80aeb0586fb10632",
+        "z": "4522ec776ef79fb7",
+        "name": "",
+        "x": 820,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "d66eb8566aa0ef7e",
+        "type": "subflow:a5e59851dbab1674",
+        "z": "4522ec776ef79fb7",
+        "name": "",
+        "x": 670,
+        "y": 200,
+        "wires": [
+            [
+                "4b7d8ef6b3cf3060"
+            ],
+            [
+                "1b33e5d7ae245253",
+                "d93848badf45c924"
+            ],
+            [
+                "f6503ed82806ce8a",
+                "d93848badf45c924"
+            ],
+            [
+                "bdad1c3e4e6b2c8a",
+                "d93848badf45c924"
+            ],
+            [
+                "a7dd1342f28b26f7"
+            ],
+            [
+                "6733e4b678c6f3db",
+                "d93848badf45c924"
+            ]
+        ]
+    },
+    {
+        "id": "3a2e59b07ea9f1a7",
+        "type": "ui-number-input",
+        "z": "4522ec776ef79fb7",
+        "g": "7f5d1b325d571f3c",
+        "group": "fb5864e4da03d5cb",
+        "name": "Requested speed",
+        "label": "Requested speed",
+        "order": 3,
+        "width": "5",
+        "height": "1",
+        "topic": "ReqSpeed",
+        "topicType": "str",
+        "min": 0,
+        "max": "20",
+        "step": 1,
+        "tooltip": "In km/h, between 0 and 20.",
+        "passthru": false,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "",
+        "clearable": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "spinner": "default",
+        "x": 210,
+        "y": 960,
+        "wires": [
+            [
+                "d4e47c4e30323cb2"
+            ]
+        ]
+    },
+    {
+        "id": "e1d592b02c7e67aa",
+        "type": "ui-button",
+        "z": "4522ec776ef79fb7",
+        "g": "7f5d1b325d571f3c",
+        "group": "fb5864e4da03d5cb",
+        "name": "Send speed",
+        "label": "Send",
+        "order": 4,
+        "width": "1",
+        "height": "1",
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "trigger",
+        "topicType": "str",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 230,
+        "y": 1020,
+        "wires": [
+            [
+                "d4e47c4e30323cb2"
+            ]
+        ]
+    },
+    {
+        "id": "d4e47c4e30323cb2",
+        "type": "function",
+        "z": "4522ec776ef79fb7",
+        "name": "Construct message",
+        "func": "// Retrieve stored value from context\nlet storedValue = context.get(\"storedValue\") || 0;\n\n// Check if the message is coming from the numeric input\nif (msg.topic === \"ReqSpeed\") {\n    context.set(\"storedValue\", msg.payload);\n    return null;  // Do not send any output yet\n}\n\n// Check if the message is coming from the button click\nif (msg.topic === \"trigger\") {\n    let angle = parseInt(context.get(\"storedValue\"))\n    msg.payload = {\n    dataID: 3,\n    data: angle\n    };\n    return msg;\n}\n\n// If neither condition is met, do nothing\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 940,
+        "wires": [
+            [
+                "c4b81cf2640637c4"
+            ]
+        ]
+    },
+    {
+        "id": "6733e4b678c6f3db",
+        "type": "ui-text",
+        "z": "4522ec776ef79fb7",
+        "group": "1c7ccf4a3006b754",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Relative Yaw Angle",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "x": 1210,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "d93848badf45c924",
+        "type": "ui-chart",
+        "z": "4522ec776ef79fb7",
+        "group": "7816832a6fb075c8",
+        "name": "",
+        "label": "chart",
+        "order": 1,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "xAxisFormat": "ss",
+        "xAxisFormatType": "custom",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "",
+        "yAxisProperty": "payload",
+        "yAxisPropertyType": "msg",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": "2",
+        "showLegend": true,
+        "removeOlder": 1,
+        "removeOlderUnit": "60",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095ff",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#a347e1",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "11",
+        "height": 8,
+        "className": "",
+        "interpolation": "linear",
+        "x": 1010,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bd6feb8aea7e509c",
+        "type": "ui-switch",
+        "z": "4522ec776ef79fb7",
+        "name": "",
+        "label": "Enable Relative Yaw Angle Diagnostic",
+        "group": "58c8e91b2efda262",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "decouple": false,
+        "topic": "7",
+        "topicType": "str",
+        "style": "",
+        "className": "",
+        "layout": "row-spread",
+        "clickableArea": "switch",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "x": 210,
+        "y": 680,
+        "wires": [
+            [
+                "a130b33b2736fe59"
+            ]
+        ]
+    }
+]
